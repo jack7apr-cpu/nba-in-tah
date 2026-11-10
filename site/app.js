@@ -37,11 +37,18 @@ function sheet(html){const s=document.createElement("div");s.className="sheet";s
 function tip(el,fn){const t=$("#tt");el.onmousemove=e=>{t.hidden=false;t.innerHTML=fn();t.style.left=Math.min(e.clientX+12,innerWidth-200)+"px";t.style.top=e.clientY+12+"px"};el.onmouseleave=()=>t.hidden=true;el.onclick=e=>{e.stopPropagation();el.onmousemove(e)}}
 
 /* HOME */
+function nowBanner(){
+  const out=[],P=D.P?.teams?.[ME],V=D.V;
+  if(P)for(const s of P.slots)if(s.chances[0]?.act==="LOCK")out.push(`<b class="pos">Lock ${esc(s.player)}</b> <span class="sub">beats the rest of his week</span>`);
+  if(V){const users=V.users.find(u=>u.display_name?.toLowerCase()==="jackhill1617"),ro=V.rosters.find(r=>r.owner_id===users?.user_id),inj={};for(const i of V.espn_injuries)inj[i.player.toLowerCase()]=i;
+    for(const pid of ro?.starters||[]){const p=V.players[pid],i=p&&inj[p.name.toLowerCase()];if(i&&/out|doubtful|questionable|day/i.test(i.status))out.push(`<b class="${/out|doubt/i.test(i.status)?"neg":"or"}" style="${/out|doubt/i.test(i.status)?"":"color:var(--or)"}">${esc(p.name)}: ${esc(i.status)}</b> <span class="sub">check before tip</span>`)}
+    const age=(Date.now()-new Date(V.updated))/36e5;if(age>8)out.push(`<b class="neg">Data is ${Math.round(age)}h old</b>`)}
+  return `<div class="card" style="margin-bottom:12px;border-color:${out.length?"var(--or)":"var(--line)"}"><div class="lbl">${out.length?"Do now":"Right now"}</div>${out.length?out.map(x=>`<div style="margin-top:4px">${x}</div>`).join(""):'<div style="margin-top:4px">Nothing needs doing. All clear.</div>'}</div>`}
 function home(){
   const m=D.M, me=m[ME], best=[...D.rank].sort((a,b)=>m[b].pf-m[a].pf)[0];
   setTimeout(()=>{document.querySelectorAll(".bar i").forEach(i=>i.style.width=i.dataset.w+"%")},50);
   after.home=()=>{drawQuad();document.querySelectorAll("[data-m]").forEach(c=>c.onclick=()=>mgrSheet(c.dataset.m))};
-  return `<div class="grid g4">
+  return `${nowBanner()}<div class="grid g4">
    <div class="card"><div class="lbl">Your Bowel rank</div><div class="big" style="color:var(--or)">#${me.rk}</div><div class="sub">${verdict(me.bowel)}</div></div>
    <div class="card"><div class="lbl">Record</div><div class="big">${me.w}–${me.l}</div><div class="sub">${f1(me.pf)} pts · avg ${f1(me.avgweek)}</div></div>
    <div class="card"><div class="lbl">Points leader</div><div class="big">${best}</div><div class="sub">${f1(m[best].pf)} pts</div></div>

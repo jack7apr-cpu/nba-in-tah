@@ -1,0 +1,25 @@
+name: Daily archive
+on:
+  schedule:
+    - cron: "5 11,22 * * *"   # twice a day
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: archive
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python engine/collect.py --out /tmp/live.json
+      - run: python engine/archive.py --live /tmp/live.json
+      - name: Commit snapshots
+        run: |
+          git config user.name "nba-in-tah bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/injuries data/proj_snapshots
+          git diff --cached --quiet || (git commit -m "archive: injury and projection snapshot" && git pull --rebase -q && git push -q)

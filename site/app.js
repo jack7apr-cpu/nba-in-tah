@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -17,7 +17,7 @@ function prep(){
   const sh=sc("top9"),po=sc("eff"),re=sc("ap");
   for(const n of names){M[n].shit=sh(n);M[n].poo=po(n);M[n].res=re(n);M[n].bowel=.4*M[n].res+.3*M[n].poo+.3*M[n].shit;}
   D.rank=names.sort((a,b)=>M[b].bowel-M[a].bowel); D.rank.forEach((n,i)=>M[n].rk=i+1);
-  D.locks=F.locks.map(l=>({...l,mgr:nm(l.mgr)})); D.players=F.players; D.fa=F.fa.map(x=>({...x,mgr:nm(x.mgr)}));
+  D.locks=F.locks.map(l=>({...l,mgr:nm(l.mgr)})); D.players=(D.AU?.players?.length?D.AU.players:F.players); D.fa=(D.AU?.fa?.length?D.AU.fa:F.fa).map(x=>({...x,mgr:nm(x.mgr)}));
   $("#nav").innerHTML=TABS.map(([k,i,t])=>`<a href="#${k}" data-k="${k}"><b>${i}</b>${t}</a>`).join("");
 }
 const lockKey=()=>"locked-"+(D.P?.week??"");
@@ -60,7 +60,7 @@ function home(){
    <div class="card"><div class="lbl">Record</div><div class="big">${me.w}–${me.l}</div><div class="sub">${f1(me.pf)} pts · avg ${f1(me.avgweek)}</div></div>
    <div class="card"><div class="lbl">Points leader</div><div class="big">${best}</div><div class="sub">${f1(m[best].pf)} pts</div></div>
    <div class="card"><div class="lbl">Points left on bench</div><div class="big">${f1(me.missed)}</div><div class="sub">lock efficiency ${(me.eff*100).toFixed(0)}%</div></div></div>
-  <h2 style="margin-top:22px">💩 The Bowel Index</h2><div class="sub" style="margin-bottom:8px"><b>Shit</b> = how big the output is (roster talent). <b>Poo</b> = how clean the job is (lock efficiency). Results = all-play win %. Weighted 40/30/30. Tap anyone.</div>
+  <h2 style="margin-top:22px">💩 The Bowel Index</h2><div class="sub" style="margin-bottom:8px"><a href="almanac.xlsx" download style="color:var(--or)">⬇ Download the almanac as Excel</a><br><b>Shit</b> = how big the output is (roster talent). <b>Poo</b> = how clean the job is (lock efficiency). Results = all-play win %. Weighted 40/30/30. Tap anyone.</div>
   <div class="grid g2"><div class="card">${D.rank.map(n=>`<div class="it row" data-m="${n}" style="padding:9px 0;cursor:pointer"><span class="num" style="width:22px">${m[n].rk}</span><div class="sp"><div class="row"><b>${n}</b><span class="sub">${verdict(m[n].bowel)}</span></div><div class="bar"><i data-w="${m[n].bowel}" style="width:0"></i></div></div><span class="num">${f1(m[n].bowel)}</span></div>`).join("")}</div>
   <div class="card"><div class="lbl">Talent (Shit) vs Cleanliness (Poo)</div><svg id="quad" viewBox="0 0 320 300" style="width:100%"></svg></div></div>`;
 }
@@ -211,6 +211,7 @@ function fun(){const fs=funStats(),T=awardTally(),weeks=Object.keys(D.wk).sort((
   <div class="card"><svg viewBox="0 0 ${W} ${H}" style="width:100%">${grid}${lines}</svg></div>
   <h3 style="margin-top:20px">Head to head</h3>${chips("h1",D.rank,a)}${chips("h2",D.rank,b)}
   <div class="card"><div class="row" style="font-weight:700"><span class="sp mut"></span><span style="width:90px;text-align:right">${a}</span><span style="width:90px;text-align:right">${b}</span></div>${rows.map(([t,f])=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp mut">${t}</span><span class="num" style="width:90px;text-align:right">${f(a)}</span><span class="num" style="width:90px;text-align:right">${f(b)}</span></div>`).join("")}${met?`<div class="sub" style="margin-top:8px">Played each other: ${met}</div>`:'<div class="sub" style="margin-top:8px">Not played yet.</div>'}</div>
+  ${reviewCard()}<h3 style="margin-top:20px">🔒 Lock Leaderboard</h3><div class="sub">The best, worst and costliest counted locks of the season.</div>${lockBoard()}
   <h3 style="margin-top:20px">🏅 Isaac's awards tally</h3><div class="card tw"><table><tr><th>Manager</th>${AW.map(k=>`<th>${k.replace("Biggest ","").replace("Shit vs Poo","S v P")}</th>`).join("")}</tr>${awRows}</table></div>`}
 
 /* MOVES: matchup stance + free agents */
@@ -221,3 +222,15 @@ function moves(){const X=D.FA;if(!X)return '<div class="card warn">Not built yet
   <h3 style="margin-top:18px">Free agents worth adding</h3><div class="sub">Best add/drop for your lineup. <b>Rest of season</b> and <b>this week</b> are the change in your best-lineup Lock-In points. Streamers show up in "this week".</div>
   <div class="card list">${X.fa.map(f=>`<div class="it" style="display:block"><div class="row"><b>Add ${esc(f.add)}</b><span class="pill">${(f.pos||[]).join("/")}</span><span class="sp"></span><span class="num pos">+${f.ros} ros</span></div><div class="sub">drop ${esc(f.drop)} · this week ${f.week>=0?"+":""}${f.week} · value ${f.value}</div></div>`).join("")||'<div class="sub">No pickup beats your current bench.</div>'}</div>
   <div class="sub" style="margin-top:8px">Waivers are rolling, so claims run in priority order. Check the player isn't hurt or on a back-to-back before claiming.</div>`}
+
+function lockBoard(){const L=D.locks,top=(arr,f)=>arr.slice(0,10).map(l=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="pill">${l.slot}</span><span class="sp"><b>${esc(l.player)}</b> <span class="sub">${l.mgr} · wk${l.wk}</span></span><span class="num">${f(l)}</span></div>`).join("");
+  const best=[...L].sort((a,b)=>b.locked-a.locked),worst=[...L].filter(l=>l.locked>0||l.best>0).sort((a,b)=>a.locked-b.locked),miss=[...L].sort((a,b)=>b.missed-a.missed);
+  return `<div class="grid g2"><div class="card"><div class="lbl">Best counted scores</div>${top(best,l=>l.locked)}</div><div class="card"><div class="lbl">Worst counted scores</div>${top(worst,l=>l.locked)}</div></div>
+  <div class="card" style="margin-top:12px"><div class="lbl">Biggest misses (best game minus the score taken)</div>${top(miss,l=>`−${f1(l.missed)} <span class="sub">(took ${l.locked}, best ${l.best})</span>`)}</div>`}
+
+function reviewCard(){const R=D.RV;if(!R)return "";const L=R.league,rows=Object.entries(R.managers).sort((a,b)=>b[1].gain-a[1].gain);
+  return `<h3 style="margin-top:20px">📝 Weekly review: you vs the lock engine</h3><div class="sub">Weeks ${R.weeks.join(", ")}. "Engine" is what the model would have scored on the same starters using only what was known at the time. Uses Sleeper's per-slot scores, so totals can differ slightly from the official ones. Rebuilt every Monday.</div>
+  <div class="card tw"><table><tr><th>Manager</th><th>Actual</th><th>Engine</th><th>Gain</th><th>Never lock</th><th>Hindsight</th></tr>${rows.map(([n,x])=>`<tr><td><b>${n}</b></td><td class="num">${f1(x.actual)}</td><td class="num">${f1(x.engine)}</td><td class="num ${x.gain>=0?"pos":"neg"}">${x.gain>=0?"+":""}${f1(x.gain)}</td><td class="num">${f1(x.never_lock)}</td><td class="num">${f1(x.hindsight)}</td></tr>`).join("")}</table></div>
+  ${L?`<div class="sub" style="margin-top:6px">League: managers ${f1(L.managers)} · engine ${f1(L.engine)} · never lock ${f1(L.never_lock)} · perfect hindsight ${f1(L.hindsight)}</div>`:""}
+  <div class="card" style="margin-top:10px"><div class="lbl">Biggest engine-vs-manager differences</div>${R.misses.map(m=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp"><b>${esc(m.player)}</b> <span class="sub">${m.mgr} · wk${m.wk} · games ${m.games.join(", ")}</span></span><span class="num">took ${m.took} · engine ${m.engine}</span></div>`).join("")}</div>
+  <div class="sub" style="margin-top:6px">${esc(R.refit||"")}</div>`}

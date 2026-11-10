@@ -38,8 +38,13 @@ def main():
     put(f"{d}/league.json", get(f"https://api.sleeper.app/v1/league/{LEAGUE}"))
     put(f"{d}/users.json", get(f"https://api.sleeper.app/v1/league/{LEAGUE}/users"))
     put(f"{d}/rosters.json", get(f"https://api.sleeper.app/v1/league/{LEAGUE}/rosters"))
+    # finished weeks are frozen the first time they are saved: Sleeper's matchup endpoint is not stable for past
+    # weeks (its starters_points drifted from the numbers we first stored), so only fetch new or current weeks
     for w in range(1, week + 1):
-        put(f"{d}/matchups/week_{w:02d}.json", get(f"https://api.sleeper.app/v1/league/{LEAGUE}/matchups/{w}"))
+        path = f"{d}/matchups/week_{w:02d}.json"
+        if w < week and os.path.exists(path):
+            continue
+        put(path, get(f"https://api.sleeper.app/v1/league/{LEAGUE}/matchups/{w}"))
     for w in sorted({max(1, week - 1), week}):
         for kind in ("projections", "stats"):
             rows = get(f"https://api.sleeper.com/{kind}/nba/{season}/{w}?season_type=regular&{POS}")

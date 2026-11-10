@@ -1,0 +1,30 @@
+name: Weekly review and refit
+on:
+  schedule:
+    - cron: "30 7 * * 1"   # Monday morning (UTC), after the weekend's games settle
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: weekly
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refresh data
+        run: |
+          python engine/fetch_raw.py
+          python engine/collect.py --out site/data/live.json
+          python almanac/official_weeks.py --live site/data/live.json --out site/data/official.json
+      - name: Review and safe refit
+        run: python engine/weekly_review.py --out site/data/review.json --refit
+      - name: Commit refit parameters and official totals
+        run: |
+          git config user.name "nba-in-tah bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add engine/risk_params.json site/data/official.json site/data/review.json data/2026
+          git diff --cached --quiet || (git commit -m "weekly: refit check, official totals, data refresh" && git pull --rebase --autostash -q && git push -q)

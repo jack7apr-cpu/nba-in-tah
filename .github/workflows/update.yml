@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install openpyxl
+        run: pip install openpyxl
       - name: Collect league data
         run: |
           python engine/collect.py --out site/data/live.json
@@ -28,7 +30,9 @@ jobs:
           python engine/export_fa.py --out site/data/fa.json
           python engine/export_trades.py --out site/data/trades.json
           python engine/crystal_nba.py --runs 20000 --out site/data/crystal.json
+          python almanac/build_auto.py --live site/data/live.json --facts site/data/factfile.json --out site/data/auto.json
           python almanac/build_weeks.py --live site/data/live.json --out site/data/weeks_auto.json
+          python almanac/export_xlsx.py --data site/data --out site/almanac.xlsx
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

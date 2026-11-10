@@ -207,6 +207,58 @@ class Crystal(unittest.TestCase):
             self.assertLessEqual(x["title"], x["playoffs"] + 1e-9)
 
 
+class AutoAlmanac(unittest.TestCase):
+    def test_players_close_to_curated_and_complete(self):
+        out = tempfile.mktemp(suffix=".json")
+        subprocess.run([sys.executable, "almanac/build_auto.py", "--out", out], check=True, capture_output=True)
+        a = json.load(open(out))
+        cur = {p["player"]: p for p in json.load(open("site/data/factfile.json"))["players"]}
+        self.assertGreater(len(a["players"]), 100)
+        diffs = [abs(p["avg"] - cur[p["player"]]["avg"]) for p in a["players"] if p["player"] in cur]
+        self.assertGreater(len(diffs), 90)
+        self.assertLess(sum(diffs) / len(diffs), 1.0)
+        for p in a["players"]:
+            self.assertGreaterEqual(p["max"], p["avg"] - 1e-6)
+            self.assertLessEqual(p["min"], p["avg"] + 1e-6)
+            self.assertGreaterEqual(p["sd"], 0)
+        self.assertTrue(all(f["mgr"] != "?" for f in a["fa"]))
+
+
+class Review(unittest.TestCase):
+    def test_review_json_shape_and_engine_beats_never_lock(self):
+        R_ = json.load(open("site/data/review.json"))
+        self.assertEqual(len(R_["managers"]), 8)
+        for v in R_["managers"].values():
+            self.assertGreaterEqual(v["hindsight"], v["actual"] - 1e-6)
+            self.assertGreaterEqual(v["actual"], v["never_lock"] - 1e-6)
+        self.assertGreater(R_["league"]["engine"], R_["league"]["never_lock"])
+        self.assertLessEqual(len(R_["misses"]), 12)
+
+
+class Export(unittest.TestCase):
+    def test_xlsx_has_sheets_without_formulas(self):
+        import openpyxl
+        out = tempfile.mktemp(suffix=".xlsx")
+        subprocess.run([sys.executable, "almanac/export_xlsx.py", "--out", out], check=True, capture_output=True)
+        wb = openpyxl.load_workbook(out)
+        for name in ("Managers", "Locks", "Players", "Waivers", "Odds", "Trade board", "Lock plan"):
+            self.assertIn(name, wb.sheetnames)
+        for ws in wb:
+            for row in ws.iter_rows(values_only=True):
+                for c in row:
+                    self.assertFalse(isinstance(c, str) and c.startswith("="), ws.title)
+        self.assertEqual(wb["Managers"].max_row, 9)
+
+
+class Frozen(unittest.TestCase):
+    def test_finished_week_matchups_are_frozen(self):
+        """Sleeper's past-week matchup points drift; the stored copies must stay as first saved (Jack = 794.5 over weeks 1-3)"""
+        r = json.load(open("data/2026/rosters.json")); u = {x["user_id"]: x["display_name"] for x in json.load(open("data/2026/users.json"))}
+        rid = next(x["roster_id"] for x in r if u[x["owner_id"]] == "jackhill1617")
+        tot = sum(sum(m["starters_points"]) for w in (1, 2, 3) for m in json.load(open(f"data/2026/matchups/week_0{w}.json")) if m["roster_id"] == rid)
+        self.assertEqual(tot, 794.5)
+
+
 class Data(unittest.TestCase):
     def test_live_json_complete(self):
         for k in ("state", "league", "users", "rosters", "matchups", "proj", "players", "espn_injuries", "schedule", "updated"):

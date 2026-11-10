@@ -1,7 +1,7 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
+const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
 Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O])=>{
@@ -34,7 +34,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup,fun})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -186,3 +186,28 @@ function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">
   return `<h2>📋 Your lineup</h2><div class="sub">The best 9 for each day, free rolls included. Set it in the Sleeper app before the first tip each day. Free roll = a bench player in a slot on a night your regular doesn't play (costs nothing while unlocked).</div>
   ${chips("dy",days.map(dn),dn(S.day))}<div class="card list">${rows}</div>
   <div class="sub" style="margin:8px 0">Bench: ${benchToday.map(esc).join(", ")||"–"}. Tap <b>I locked</b> after you lock someone. Sleeper can't tell us.</div>`}
+
+/* FUN: awards tally, fun metrics, weekly score lines, head-to-head */
+S.h2h=["Jack","Isaac"];S.hl=null;
+const AW=["Biggest Chud","Holy Glaze","Heaven","Hell","Shit vs Poo"];
+function funStats(){const m={};for(const n of D.rank)m[n]={f40:0,f30:0,stink:0,zero:0,perfect:0,n:0,left:0};
+  for(const l of D.locks){const x=m[l.mgr];if(!x)continue;x.n++;if(l.locked>=40)x.f40++;if(l.locked>=30)x.f30++;if(l.locked<15)x.stink++;if(l.locked<=0)x.zero++;if(l.missed<=0)x.perfect++;x.left+=l.missed}return m}
+function awardTally(){const t={};for(const n of D.rank)t[n]={};for(const [w,x] of Object.entries(D.L.weeks))for(const [k,v] of Object.entries(x.isaac?.awards||{}))for(const n of D.rank)if(new RegExp("\\b"+n+"\\b","i").test(v||""))t[n][k]=(t[n][k]||0)+1;return t}
+function fun(){const fs=funStats(),T=awardTally(),weeks=Object.keys(D.wk).sort((a,b)=>a-b);
+  after.fun=()=>{bindChips("h1",v=>{S.h2h[0]=v;route()});bindChips("h2",v=>{S.h2h[1]=v;route()});document.querySelectorAll("[data-ln]").forEach(e=>e.onclick=()=>{S.hl=S.hl===e.dataset.ln?null:e.dataset.ln;route()})};
+  const cards=[["🏆 Points leader",n=>D.M[n].pf,x=>f1(x)+" pts"],["🎯 Best lock average",n=>D.M[n].lockavg,x=>f1(x)],["💥 Most 40+ locks",n=>fs[n].f40,x=>x],["🧻 Most stinkers (<15)",n=>fs[n].stink,x=>x],["✨ Most perfect locks",n=>fs[n].perfect,x=>x],["🕳️ Points left on bench",n=>fs[n].left,x=>f1(x)]];
+  const hi=cards.map(([t,f,fmt])=>{const o=[...D.rank].sort((a,b)=>f(b)-f(a));return `<div class="card"><div class="lbl">${t}</div><div class="big" style="font-size:24px">${o[0]}</div><div class="sub">${fmt(f(o[0]))} · last: ${o[o.length-1]} ${fmt(f(o[o.length-1]))}</div></div>`}).join("");
+  const W=640,H=240,P=34,all=D.rank.flatMap(n=>weeks.map(w=>D.wk[w][n]).filter(v=>v!=null)),lo=Math.floor(Math.min(...all)/20)*20,hiY=Math.ceil(Math.max(...all)/20)*20,x=i=>P+i*(W-P-12)/Math.max(1,weeks.length-1),y=v=>H-P-(v-lo)/(hiY-lo)*(H-P-12);
+  const cols=["#ff7a1a","#5aa9ff","#35e0a1","#ffd23f","#c084fc","#ff4d6d","#2dd4bf","#a3a3a3"];
+  const lines=D.rank.map((n,k)=>{const pts=weeks.map((w,i)=>[x(i),y(D.wk[w][n]),D.wk[w][n]]).filter(p=>p[1]===p[1]),on=!S.hl||S.hl===n;return `<g opacity="${on?1:.15}"><polyline fill="none" stroke="${cols[k]}" stroke-width="${n===ME||S.hl===n?3:1.8}" points="${pts.map(p=>p[0]+","+p[1]).join(" ")}"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${cols[k]}"><title>${n}: ${p[2]}</title></circle>`).join("")}</g>`}).join("");
+  const grid=[0,1,2,3,4].map(i=>{const v=lo+(hiY-lo)*i/4;return `<line x1="${P}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="#222c4a"/><text x="4" y="${y(v)+4}">${Math.round(v)}</text>`}).join("")+weeks.map((w,i)=>`<text x="${x(i)}" y="${H-10}" text-anchor="middle">W${w}</text>`).join("");
+  const legend=D.rank.map((n,k)=>`<span class="chip ${S.hl===n?"on":""}" data-ln="${n}" style="border-color:${cols[k]}">${n}</span>`).join("");
+  const [a,b]=S.h2h,rows=[["Record",n=>D.M[n].w+"–"+D.M[n].l],["Points for",n=>f1(D.M[n].pf)],["Avg week",n=>f1(D.M[n].avgweek)],["Best week",n=>D.M[n].hi],["Worst week",n=>D.M[n].lo],["Lock avg",n=>f1(D.M[n].lockavg)],["Talent (Shit)",n=>f1(D.M[n].shit)],["Cleanliness (Poo)",n=>f1(D.M[n].poo)],["Bowel score",n=>f1(D.M[n].bowel)],["40+ locks",n=>fs[n].f40],["Stinkers",n=>fs[n].stink]];
+  const met=weeks.filter(w=>a in D.wk[w]&&b in D.wk[w]).map(w=>`W${w}: ${D.wk[w][a]}–${D.wk[w][b]}`).join(" · ");
+  const awRows=D.rank.map(n=>`<tr><td><b>${n}</b></td>${AW.map(k=>`<td class="num">${T[n][k]||"·"}</td>`).join("")}</tr>`).join("");
+  return `<h2>🎉 Fun</h2><div class="grid g2">${hi}</div>
+  <h3 style="margin-top:20px">Weekly scores</h3><div class="sub">Tap a name to highlight a line. Tap a dot for the score.</div><div class="chips">${legend}</div>
+  <div class="card"><svg viewBox="0 0 ${W} ${H}" style="width:100%">${grid}${lines}</svg></div>
+  <h3 style="margin-top:20px">Head to head</h3>${chips("h1",D.rank,a)}${chips("h2",D.rank,b)}
+  <div class="card"><div class="row" style="font-weight:700"><span class="sp mut"></span><span style="width:90px;text-align:right">${a}</span><span style="width:90px;text-align:right">${b}</span></div>${rows.map(([t,f])=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp mut">${t}</span><span class="num" style="width:90px;text-align:right">${f(a)}</span><span class="num" style="width:90px;text-align:right">${f(b)}</span></div>`).join("")}${met?`<div class="sub" style="margin-top:8px">Played each other: ${met}</div>`:'<div class="sub" style="margin-top:8px">Not played yet.</div>'}</div>
+  <h3 style="margin-top:20px">🏅 Isaac's awards tally</h3><div class="card tw"><table><tr><th>Manager</th>${AW.map(k=>`<th>${k.replace("Biggest ","").replace("Shit vs Poo","S v P")}</th>`).join("")}</tr>${awRows}</table></div>`}

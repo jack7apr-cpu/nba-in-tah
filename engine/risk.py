@@ -38,6 +38,16 @@ STATUS_PLAY = {"Out": 0.0, "IR": 0.0, "Injured Reserve": 0.0, "Suspension": 0.0,
 STATUS_FADE, STATUS_FADE_OUT = 0.7, 0.85   # per day ahead; an "Out" tag lingers longer than a GTD
 
 
+def refine(status, note):
+    """ESPN files most players as Day-To-Day; the note says how likely he is to play (probable/questionable/doubtful)"""
+    n = (note or "").lower()
+    if status == "Day-To-Day":
+        for word, tag in (("probable", "Probable"), ("doubtful", "Doubtful"), ("questionable", "Questionable")):
+            if word in n:
+                return tag
+    return status
+
+
 def espn_status(L, live=None):
     """second injury source: ESPN's league injury report -> {pid: status}. Reads collect.py's live.json if given,
     else fetches the public endpoint. Name match is exact after accent folding, so a miss means no ESPN status."""
@@ -45,13 +55,13 @@ def espn_status(L, live=None):
     fold = lambda s: unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().replace(".", "").strip()
     rows = []
     if live and os.path.exists(live):
-        rows = [(r["player"], r["status"]) for r in (N.load(live).get("espn_injuries") or [])]
+        rows = [(r["player"], refine(r["status"], r.get("note"))) for r in (N.load(live).get("espn_injuries") or [])]
     if not rows:
         try:
             req = urllib.request.Request("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries",
                                          headers={"User-Agent": "nba-in-tah/1.0"})
             j = json.load(urllib.request.urlopen(req, timeout=30))
-            rows = [(i["athlete"]["displayName"], i["status"]) for t in j["injuries"] for i in t["injuries"]]
+            rows = [(i["athlete"]["displayName"], refine(i["status"], i.get("shortComment"))) for t in j["injuries"] for i in t["injuries"]]
         except Exception:
             return {}
     by = {}
@@ -115,7 +125,10 @@ class Model:
         if b2b:
             q = min(1.0, q + p.bb)
         play = 1 - q
-        for st in (status if isinstance(status, (list, tuple)) else [status]):
+        sts = list(status) if isinstance(status, (list, tuple)) else [status]
+        if "Probable" in sts and all(x in (None, "Probable", "GTD", "Day-To-Day") for x in sts):
+            sts = ["Probable"]   # the team's explicit "probable" beats Sleeper's generic GTD tag
+        for st in sts:
             if st in STATUS_PLAY:   # today's tag fades for later games (unvalidated prior: no injury history to replay)
                 miss = (1 - STATUS_PLAY[st]) * (STATUS_FADE_OUT if STATUS_PLAY[st] == 0 else STATUS_FADE) ** (D(d) - D(t)).days
                 play = min(play, 1 - miss)

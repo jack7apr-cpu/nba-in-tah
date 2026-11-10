@@ -220,7 +220,7 @@ class Data(unittest.TestCase):
             self.assertEqual(sc[k], v, k)
 
     def test_no_secrets_in_repo(self):
-        out = subprocess.run(["git", "grep", "-nE", "github_pat_|ghp_|nba-in-tah-jh-|nba-in-tah-cmd-"], capture_output=True, text=True).stdout
+        out = subprocess.run(["git", "grep", "-nE", "github_pat_|ghp_|nba-in-tah-jh-|nba-in-tah-cmd-", "--", ".", ":!tests"], capture_output=True, text=True).stdout
         self.assertEqual(out.strip(), "")
 
 

@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -20,6 +20,9 @@ function prep(){
   D.locks=F.locks.map(l=>({...l,mgr:nm(l.mgr)})); D.players=F.players; D.fa=F.fa.map(x=>({...x,mgr:nm(x.mgr)}));
   $("#nav").innerHTML=TABS.map(([k,i,t])=>`<a href="#${k}" data-k="${k}"><b>${i}</b>${t}</a>`).join("");
 }
+const lockKey=()=>"locked-"+(D.P?.week??"");
+function lockedSet(){const set=new Set(D.K&&D.K.week===D.P?.week?D.K.players:[]);try{for(const n of JSON.parse(localStorage.getItem(lockKey())||"[]"))set.add(n)}catch(e){}return set}
+function toggleLock(n){let a=[];try{a=JSON.parse(localStorage.getItem(lockKey())||"[]")}catch(e){}const i=a.indexOf(n);i<0?a.push(n):a.splice(i,1);try{localStorage.setItem(lockKey(),JSON.stringify(a))}catch(e){}route()}
 const verdict=b=>b>=85?"Ghost shit: no wipe needed":b>=70?"Textbook: two wipes":b>=55?"Solid log":b>=40?"Bit of a mess":b>=25?"Dodgy kebab":"Full norovirus";
 const quad=m=>m.shit>=50&&m.poo>=50?"Big and clean":m.shit>=50?"Big log, messy wipe":m.poo>=50?"Small but tidy":"Small and messy";
 
@@ -39,7 +42,7 @@ function tip(el,fn){const t=$("#tt");el.onmousemove=e=>{t.hidden=false;t.innerHT
 /* HOME */
 function nowBanner(){
   const out=[],P=D.P?.teams?.[ME],V=D.V;
-  if(P)for(const s of P.slots)if(s.chances[0]?.act==="LOCK")out.push(`<b class="pos">Lock ${esc(s.player)}</b> <span class="sub">beats the rest of his week</span>`);
+  const LK=lockedSet();if(P)for(const s of P.slots)if(s.chances[0]?.act==="LOCK"&&!LK.has(s.player))out.push(`<b class="pos">Lock ${esc(s.player)}</b> <span class="sub">beats the rest of his week</span>`);
   if(V){const users=V.users.find(u=>u.display_name?.toLowerCase()==="jackhill1617"),ro=V.rosters.find(r=>r.owner_id===users?.user_id),inj={};for(const i of V.espn_injuries)inj[i.player.toLowerCase()]=i;
     for(const pid of ro?.starters||[]){const p=V.players[pid],i=p&&inj[p.name.toLowerCase()];if(i&&/out|doubtful|questionable|day/i.test(i.status))out.push(`<b class="${/out|doubt/i.test(i.status)?"neg":"or"}" style="${/out|doubt/i.test(i.status)?"":"color:var(--or)"}">${esc(p.name)}: ${esc(i.status)}</b> <span class="sub">check before tip</span>`)}
     const age=(Date.now()-new Date(V.updated))/36e5;if(age>8)out.push(`<b class="neg">Data is ${Math.round(age)}h old</b>`)}
@@ -112,11 +115,11 @@ function waivers(){return `<h2>🔄 Waivers</h2><div class="sub">Every completed
 
 /* LIVE */
 function planCard(){const P=D.P;if(!P)return "";const t=P.teams[ME];if(!t)return "";
-  const lock=t.slots.filter(s=>s.chances[0]?.act==="LOCK");
+  const LK=lockedSet(),lock=t.slots.filter(s=>s.chances[0]?.act==="LOCK"&&!LK.has(s.player));after.live=()=>document.querySelectorAll("[data-lk]").forEach(e=>e.onclick=ev=>{ev.stopPropagation();toggleLock(e.dataset.lk)});
   const pill=c=>c.act==="LOCK"?'<span class="pill gr">LOCK NOW</span>':c.act==="HOLD"?'<span class="pill">hold</span>':c.act==="FORCED"?'<span class="pill rd">final chance</span>':`<span class="pill or">lock if ≥ ${c.th}</span>`;
-  return `<h2>🔒 Lock plan · week ${P.week}</h2><div class="sub">From the replay-tested model: each slot is a run of chances, and you lock when the score beats what the rest of the week is worth. Built ${P.today}.</div>
+  return `<h2>🔒 Lock plan · week ${P.week}</h2><div class="sub">From the replay-tested model: each slot is a run of chances, and you lock when the score beats what the rest of the week is worth. Built ${P.today}. Sleeper doesn't tell the site what you've locked, so tap <b>I locked</b> on a slot to clear it here.</div>
   ${lock.length?`<div class="card" style="border-color:var(--gr);margin:10px 0"><div class="lbl">Do now</div>${lock.map(s=>`<div class="big" style="font-size:22px;color:var(--gr)">Lock ${esc(s.player)}</div><div class="sub">his score beats the rest of the week (worth ${s.worth})</div>`).join("")}</div>`:'<div class="card" style="margin:10px 0">Nothing to lock right now. Hold everyone.</div>'}
-  <div class="card list">${t.slots.map(s=>{const n=s.chances[0];return `<div class="it" data-sl="${esc(s.slot)}"><span class="pill">${s.slot}</span><div class="sp"><b>${esc(s.player)}</b> <span class="sub">worth ${s.worth}</span><div class="sub">${s.chances.map(c=>`${c.date.slice(5)} ${c.free?"🎲 "+esc(c.player):""} ${Math.round(c.plays*100)}% · ${c.exp}`).join(" → ")}</div></div>${n?pill(n):""}</div>`}).join("")}</div>
+  <div class="card list">${t.slots.map(s=>{const n=s.chances[0];return `<div class="it" data-sl="${esc(s.slot)}"><span class="pill">${s.slot}</span><div class="sp"><b>${esc(s.player)}</b> <span class="sub">worth ${s.worth}</span><div class="sub">${s.chances.map(c=>`${c.date.slice(5)} ${c.free?"🎲 "+esc(c.player):""} ${Math.round(c.plays*100)}% · ${c.exp}`).join(" → ")}</div></div>${LK.has(s.player)?'<span class="pill gr">locked ✓</span>':n?pill(n):""}<span class="pill" data-lk="${esc(s.player)}" style="cursor:pointer">${LK.has(s.player)?"undo":"I locked"}</span></div>`}).join("")}</div>
   <div class="sub" style="margin:6px 0 18px">Expected lineup total ${t.total}. Bench: ${t.bench.map(b=>esc(b.player)).join(", ")||"–"}.</div>`}
 function live(){const V=D.V;if(!V)return '<div class="card warn">Live data unavailable.</div>';
   const age=(Date.now()-new Date(V.updated))/36e5,errs=Object.keys(V.errors||{}),sc=V.league.scoring_settings;

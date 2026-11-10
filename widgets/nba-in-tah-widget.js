@@ -6,7 +6,8 @@ const ME = "Jack";
 async function get(name) {
   try { return await new Request(BASE + name + "?t=" + Date.now()).loadJSON(); } catch (e) { return null; }
 }
-const [plan, crystal] = await Promise.all([get("plan.json"), get("crystal.json")]);
+const [plan, crystal, locked] = await Promise.all([get("plan.json"), get("crystal.json"), get("locked.json")]);
+const done = new Set(locked && plan && locked.week === plan.week ? locked.players : []);
 
 const w = new ListWidget();
 w.backgroundColor = new Color("#0a0e1a");
@@ -17,7 +18,7 @@ const t = w.addText("NBA IN TAH");
 t.font = Font.boldSystemFont(11); t.textColor = new Color("#ff7a1a");
 w.addSpacer(4);
 
-const locks = plan ? plan.teams[ME].slots.filter(s => s.chances[0] && s.chances[0].act === "LOCK") : [];
+const locks = plan ? plan.teams[ME].slots.filter(s => s.chances[0] && s.chances[0].act === "LOCK" && !done.has(s.player)) : [];
 const main = w.addText(locks.length ? "Lock " + locks.map(s => s.player.split(" ").slice(-1)[0]).join(", ") : plan ? "All clear" : "No data");
 main.font = Font.boldSystemFont(locks.length ? 20 : 22);
 main.textColor = new Color(locks.length ? "#35e0a1" : "#e9edf8");

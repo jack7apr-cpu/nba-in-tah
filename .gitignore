@@ -3,3 +3,4 @@ __pycache__/
 .DS_Store
 site/data/live.json
 data/live.json
+site/data/weeks_auto.json

@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V])=>{
-  D.L=L; D.F=F; D.V=V; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -58,7 +58,10 @@ function drawQuad(){
 
 /* WEEKS */
 function weeks(){
-  const ws=Object.keys(D.L.weeks).map(Number),w=D.L.weeks[S.wk]; after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-mu]").forEach(c=>c.onclick=()=>muSheet(+c.dataset.mu))};
+  const ws=[...new Set([...Object.keys(D.L.weeks),...Object.keys(D.A)].map(Number))].sort((a,b)=>a-b);
+  if(!D.L.weeks[S.wk]){const A=D.A[S.wk]||{matchups:[]};after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-au]").forEach(c=>c.onclick=()=>autoSheet(+c.dataset.au))};
+    return `${chips("wkc",ws.map(x=>"Week "+x),"Week "+S.wk)}<div class="card warn" style="margin-bottom:12px">${A.status==="live"?"Live week":"Week not yet curated"}: scores come straight from Sleeper's API and can differ from the official Lock-In counted totals. The official numbers and Isaac's recap land after the week ends.</div><div class="grid g2">${A.matchups.map(([a,b],i)=>`<div class="card tap" data-au="${i}"><div class="row"><b ${a.pts>b.pts?'style="color:var(--gr)"':""}>${a.mgr}</b><span class="sp"></span><span class="num">${a.pts}</span></div><div class="row"><b ${b.pts>a.pts?'style="color:var(--gr)"':""}>${b.mgr}</b><span class="sp"></span><span class="num">${b.pts}</span></div><div class="sub" style="margin-top:6px">tap for slots</div></div>`).join("")||'<div class="card sub">No matchups yet.</div>'}</div>`}
+  const w=D.L.weeks[S.wk]; after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-mu]").forEach(c=>c.onclick=()=>muSheet(+c.dataset.mu))};
   const aw=w.isaac?.awards||{};
   return `${chips("wkc",ws.map(x=>"Week "+x),"Week "+S.wk)}
   <div class="grid g2">${w.matchups.map(([a,pa,b,pb],i)=>{const win=pa>pb;return `<div class="card tap" data-mu="${i}"><div class="row"><b ${win?'style="color:var(--gr)"':""}>${a}</b><span class="sp"></span><span class="num">${pa}</span></div><div class="row"><b ${!win?'style="color:var(--gr)"':""}>${b}</b><span class="sp"></span><span class="num">${pb}</span></div><div class="sub" style="margin-top:6px">margin ${f1(Math.abs(pa-pb))} · tap for locks</div></div>`}).join("")}</div>
@@ -67,6 +70,8 @@ function weeks(){
   <h2 style="margin-top:20px">Isaac's recap</h2><div class="recap">${esc(w.isaac?.text||"No recap yet.")}</div>`;
 }
 function muSheet(i){const w=D.L.weeks[S.wk],[a,pa,b,pb]=w.matchups[i];const col=n=>`<div><h3>${n}</h3>${(w.locks[n]||[]).map(([p,s])=>`<div class="row" style="padding:4px 0"><span class="sp">${esc(p)}</span><span class="num ${s<18?"neg":s>=35?"pos":""}">${s}</span></div>`).join("")}</div>`;sheet(`<h2>${a} ${pa} – ${pb} ${b}</h2><div class="grid g2">${col(a)}${col(b)}</div>`)}
+
+function autoSheet(i){const [a,b]=D.A[S.wk].matchups[i];const col=x=>`<div><h3>${x.mgr} · ${x.pts}</h3>${x.slots.map(([sl,p,pt])=>`<div class="row" style="padding:4px 0"><span class="pill">${sl}</span><span class="sp">${esc(p)}</span><span class="num ${pt===0?"mut":pt>=35?"pos":""}">${pt}</span></div>`).join("")}</div>`;sheet(`<h2>${a.mgr} vs ${b.mgr}</h2><div class="grid g2">${col(a)}${col(b)}</div>`)}
 
 /* MANAGERS */
 function mgrs(){after.mgrs=()=>document.querySelectorAll("[data-m]").forEach(c=>c.onclick=()=>mgrSheet(c.dataset.m));

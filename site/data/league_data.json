@@ -1,0 +1,1728 @@
+{
+ "season_start": "2026-10-19",
+ "weeks": {
+  "1": {
+   "matchups": [
+    [
+     "Jack",
+     268.5,
+     "Tony",
+     183.5
+    ],
+    [
+     "Lewis",
+     270.5,
+     "Matt",
+     213
+    ],
+    [
+     "Maxi",
+     216.5,
+     "David",
+     204
+    ],
+    [
+     "Isaac",
+     260.5,
+     "Kyran",
+     265.5
+    ]
+   ],
+   "locks": {
+    "Jack": [
+     [
+      "Josh Giddey",
+      25
+     ],
+     [
+      "Dejounte Murray",
+      27.5
+     ],
+     [
+      "Jamal Murray",
+      39
+     ],
+     [
+      "Michael Porter Jr.",
+      25.5
+     ],
+     [
+      "Giannis Antetokounmpo",
+      40.5
+     ],
+     [
+      "Jalen Johnson",
+      30
+     ],
+     [
+      "Walker Kessler",
+      39
+     ],
+     [
+      "Donovan Clingan",
+      24
+     ],
+     [
+      "Matas Buzelis",
+      17.5
+     ]
+    ],
+    "Tony": [
+     [
+      "Cade Cunningham",
+      22.5
+     ],
+     [
+      "Devin Booker",
+      17.5
+     ],
+     [
+      "Trae Young",
+      28
+     ],
+     [
+      "Trey Murphy III",
+      11.5
+     ],
+     [
+      "Karl-Anthony Towns",
+      28
+     ],
+     [
+      "Evan Mobley",
+      18.5
+     ],
+     [
+      "Jabari Smith Jr.",
+      16
+     ],
+     [
+      "Zion Williamson",
+      21
+     ],
+     [
+      "Lauri Markkanen",
+      20.5
+     ]
+    ],
+    "Lewis": [
+     [
+      "Donovan Mitchell",
+      33
+     ],
+     [
+      "Immanuel Quickley",
+      28.5
+     ],
+     [
+      "Dyson Daniels",
+      25
+     ],
+     [
+      "OG Anunoby",
+      28
+     ],
+     [
+      "Anthony Davis",
+      38.5
+     ],
+     [
+      "Chet Holmgren",
+      34
+     ],
+     [
+      "Victor Wembanyama",
+      29.5
+     ],
+     [
+      "Bam Adebayo",
+      23
+     ],
+     [
+      "Julius Randle",
+      31
+     ]
+    ],
+    "Matt": [
+     [
+      "Shai Gilgeous-Alexander",
+      37.5
+     ],
+     [
+      "Tyrese Haliburton",
+      32
+     ],
+     [
+      "Mikal Bridges",
+      11
+     ],
+     [
+      "LeBron James",
+      26
+     ],
+     [
+      "Jaren Jackson Jr.",
+      31
+     ],
+     [
+      "Ausar Thompson",
+      0
+     ],
+     [
+      "Rudy Gobert",
+      19
+     ],
+     [
+      "Stephon Castle",
+      26
+     ],
+     [
+      "Kawhi Leonard",
+      30.5
+     ]
+    ],
+    "Maxi": [
+     [
+      "Tyrese Maxey",
+      34
+     ],
+     [
+      "Cooper Flagg",
+      27.5
+     ],
+     [
+      "Stephen Curry",
+      0
+     ],
+     [
+      "Brandon Miller",
+      25.5
+     ],
+     [
+      "Domantas Sabonis",
+      34
+     ],
+     [
+      "Paolo Banchero",
+      34
+     ],
+     [
+      "Pascal Siakam",
+      24
+     ],
+     [
+      "Alex Sarr",
+      16
+     ],
+     [
+      "Derik Queen",
+      21.5
+     ]
+    ],
+    "David": [
+     [
+      "Anthony Edwards",
+      14
+     ],
+     [
+      "Amen Thompson",
+      27.5
+     ],
+     [
+      "Ja Morant",
+      16.5
+     ],
+     [
+      "Jayson Tatum",
+      39.5
+     ],
+     [
+      "Paul George",
+      21
+     ],
+     [
+      "Kevin Durant",
+      16.5
+     ],
+     [
+      "Neemias Queta",
+      19
+     ],
+     [
+      "Keyonte George",
+      30
+     ],
+     [
+      "Darius Garland",
+      20
+     ]
+    ],
+    "Isaac": [
+     [
+      "Luka Doncic",
+      53
+     ],
+     [
+      "Tyler Herro",
+      23
+     ],
+     [
+      "Austin Reaves",
+      24.5
+     ],
+     [
+      "Franz Wagner",
+      32.5
+     ],
+     [
+      "Alperen Sengun",
+      28.5
+     ],
+     [
+      "Cameron Boozer",
+      33.5
+     ],
+     [
+      "Jalen Duren",
+      24
+     ],
+     [
+      "Jalen Williams",
+      14
+     ],
+     [
+      "Zach Edey",
+      23
+     ]
+    ],
+    "Kyran": [
+     [
+      "Jalen Brunson",
+      24.5
+     ],
+     [
+      "Derrick White",
+      18
+     ],
+     [
+      "LaMelo Ball",
+      20.5
+     ],
+     [
+      "Jaylen Brown",
+      26.5
+     ],
+     [
+      "Scottie Barnes",
+      35.5
+     ],
+     [
+      "Naz Reid",
+      31
+     ],
+     [
+      "Nikola Jokic",
+      53.5
+     ],
+     [
+      "Ivica Zubac",
+      28
+     ],
+     [
+      "Deni Avdija",
+      28
+     ]
+    ]
+   },
+   "isaac": {
+    "text": "For those of you already in the demons dynasty NFL fantasy weekly recaps will be nothing new. And for NBA fantasy there’s nothing different here. I’ll be doing some brief recaps every week so people stay interested alongside awarding my biggest chud, shit vs poo award and my holy glaze of the week.\n\nKyran v Isaac\nOur highest scoring matchup of the week was won by an essentially perfect set of picks by Kyran alongside some exceptional performances such as jokic dropping 53 and Naz Reid (???) dropping 31 on his first game of the season. This combined with some managerial mistakes on my end and a jalen williams stinker handed Kyran the win.\n\nTony v Jack\nOur biggest blowout of the week was defined by huge performances across Jill’s horrible team. With 4 players getting over 30 points and 2 of those 4 getting over 40 it was never in doubt for Jack. In fact it was such a walk over that Jack won every single head to head player matchup apart from 1 in this game.\n\nLewis v Matt\nIn what seems like the unluckiest loss of the week Lewis takes down Matt in a high scoring affair. On Matt’s side I’d say that the main reason for loss was unfortunate performances from Ausar Thompson, Rudy Gobert and Mikel Bridges. Had those guys lived up to their predicteds this would have been a closer game. This alongside an exceptional managerial performance by Lewis led to the win.\n\nMaxi vs David\nIn the weekly battle of shit vs poo maxi edges out a win against David. David saw that ant dropped 44 in his first game and just refused to lock it in. Saw PG dropped 37 and again refused to lock it in. Actually looking at it I don’t think David locked a single player in this week and just let their last games determine  their score. The only reason this was close was due to Maxi locking in a 0 from curry and starting Alex Sarr.\n\nThat wraps up the week one match ups and without further ado the winners for each award are.\n\nBiggest Chud: David\nShit vs Poo award: Maxi vs David\nHoly glaze of the week: Kyran",
+    "awards": {
+     "Biggest Chud": "David",
+     "Shit vs Poo": "Maxi vs David",
+     "Holy Glaze": "Kyran",
+     "Heaven": "",
+     "Hell": ""
+    }
+   },
+   "sleeper_report": {
+    "best_team": [
+     "Lewis",
+     266.5
+    ],
+    "worst_team": [
+     "Tony",
+     181.5
+    ],
+    "top_picks": [
+     [
+      "PG",
+      "Luka Dončić",
+      "Isaac",
+      57.5,
+      "@ UTA"
+     ],
+     [
+      "SG",
+      "Donovan Mitchell",
+      "Lewis",
+      33.0,
+      "@ PHI"
+     ],
+     [
+      "SF",
+      "Jayson Tatum",
+      "David",
+      39.5,
+      "vs NYK"
+     ],
+     [
+      "PF",
+      "Giannis Antetokounmpo",
+      "Jack",
+      40.5,
+      "vs DET"
+     ],
+     [
+      "C",
+      "Nikola Jokić",
+      "Kyran",
+      53.5,
+      "vs NOP"
+     ]
+    ],
+    "awards": [
+     [
+      "Most efficient manager",
+      "Kyran",
+      259.0,
+      "max 262.50"
+     ],
+     [
+      "Least efficient manager",
+      "Tony",
+      181.5,
+      "max 258.00"
+     ],
+     [
+      "Highest points in a loss",
+      "Isaac",
+      254.0,
+      "vs Kyran 259.00"
+     ],
+     [
+      "Lowest points in a win",
+      "Maxi",
+      214.5,
+      "vs David 201.00"
+     ]
+    ],
+    "top_fas": [
+     [
+      "PG",
+      "Davion Mitchell",
+      "MIA",
+      20.67
+     ],
+     [
+      "SG",
+      "Kris Dunn",
+      "LAC",
+      21.83
+     ],
+     [
+      "SF",
+      "RJ Barrett",
+      "TOR",
+      20.67
+     ],
+     [
+      "PF",
+      "Precious Achiuwa",
+      "SAC",
+      21.0
+     ],
+     [
+      "C",
+      "Wendell Carter Jr.",
+      "ORL",
+      20.83
+     ]
+    ],
+    "pick_performance": [
+     [
+      "Lewis",
+      270.5,
+      284.5
+     ],
+     [
+      "Jack",
+      268.5,
+      290.0
+     ],
+     [
+      "Kyran",
+      265.5,
+      269.0
+     ],
+     [
+      "Isaac",
+      260.5,
+      271.5
+     ],
+     [
+      "Maxi",
+      216.5,
+      246.0
+     ],
+     [
+      "Matt",
+      213.0,
+      238.5
+     ],
+     [
+      "David",
+      204.0,
+      270.5
+     ],
+     [
+      "Tony",
+      183.5,
+      261.5
+     ]
+    ],
+    "matchup_mvp": [
+     [
+      "Jack",
+      268.5,
+      227.34,
+      6,
+      0
+     ],
+     [
+      "Tony",
+      183.5,
+      218.51,
+      1,
+      3
+     ],
+     [
+      "Isaac",
+      260.5,
+      217.38,
+      5,
+      0
+     ],
+     [
+      "Kyran",
+      265.5,
+      226.49,
+      7,
+      0
+     ],
+     [
+      "Lewis",
+      270.5,
+      221.35,
+      7,
+      1
+     ],
+     [
+      "Matt",
+      213.0,
+      183.41,
+      4,
+      0
+     ],
+     [
+      "Maxi",
+      216.5,
+      184.41,
+      6,
+      0
+     ],
+     [
+      "David",
+      204.0,
+      191.41,
+      1,
+      0
+     ]
+    ],
+    "standings": [
+     [
+      "Lewis",
+      "1-0",
+      266.5,
+      211.0
+     ],
+     [
+      "Jack",
+      "1-0",
+      266.0,
+      181.5
+     ],
+     [
+      "Kyran",
+      "1-0",
+      259.0,
+      254.0
+     ],
+     [
+      "Maxi",
+      "1-0",
+      214.5,
+      201.0
+     ],
+     [
+      "Isaac",
+      "0-1",
+      254.0,
+      259.0
+     ],
+     [
+      "Matt",
+      "0-1",
+      211.0,
+      266.5
+     ],
+     [
+      "David",
+      "0-1",
+      201.0,
+      214.5
+     ],
+     [
+      "Tony",
+      "0-1",
+      181.5,
+      266.0
+     ]
+    ]
+   },
+   "claude": {
+    "text": "Lewis posted the week's top score (270.5) and beat Matt by 57.5. Jack's 85-point win over Tony is still the biggest margin of the season. Kyran counted the player's best game of the week in 8 of 9 slots to edge Isaac by 5; Isaac's 260.5 would have beaten four other teams. David let 7 of 9 slots run to the final game: Edwards' 45 became a 14 and Paul George's 37.5 became a 21. Maxi still won with 216.5 despite a 0 from Curry.",
+    "awards": {
+     "Biggest Chud": "David",
+     "Holy Glaze": "Kyran",
+     "Heaven": "Isaac",
+     "Hell": "Maxi"
+    }
+   }
+  },
+  "2": {
+   "matchups": [
+    [
+     "Jack",
+     260.5,
+     "Matt",
+     205.5
+    ],
+    [
+     "Isaac",
+     271,
+     "David",
+     216.5
+    ],
+    [
+     "Kyran",
+     221.5,
+     "Tony",
+     181
+    ],
+    [
+     "Lewis",
+     224.5,
+     "Maxi",
+     246
+    ]
+   ],
+   "locks": {
+    "Jack": [
+     [
+      "Darius Acuff Jr.",
+      30.5
+     ],
+     [
+      "Josh Giddey",
+      26.5
+     ],
+     [
+      "Jamal Murray",
+      28
+     ],
+     [
+      "Cedric Coward",
+      26
+     ],
+     [
+      "Giannis Antetokounmpo",
+      43
+     ],
+     [
+      "Jalen Johnson",
+      16
+     ],
+     [
+      "Jarrett Allen",
+      26
+     ],
+     [
+      "Walker Kessler",
+      31
+     ],
+     [
+      "Michael Porter Jr.",
+      33.5
+     ]
+    ],
+    "Matt": [
+     [
+      "Shai Gilgeous-Alexander",
+      21.5
+     ],
+     [
+      "Tyrese Haliburton",
+      31
+     ],
+     [
+      "Mikal Bridges",
+      19
+     ],
+     [
+      "LeBron James",
+      30.5
+     ],
+     [
+      "Andrew Wiggins",
+      14
+     ],
+     [
+      "Ausar Thompson",
+      23.5
+     ],
+     [
+      "Rudy Gobert",
+      26.5
+     ],
+     [
+      "Stephon Castle",
+      24.5
+     ],
+     [
+      "Onyeka Okongwu",
+      15
+     ]
+    ],
+    "Isaac": [
+     [
+      "Luka Doncic",
+      38.5
+     ],
+     [
+      "Tyler Herro",
+      34
+     ],
+     [
+      "Austin Reaves",
+      16
+     ],
+     [
+      "Franz Wagner",
+      30
+     ],
+     [
+      "Alperen Sengun",
+      41
+     ],
+     [
+      "Cameron Boozer",
+      38.5
+     ],
+     [
+      "Isaiah Hartenstein",
+      24.5
+     ],
+     [
+      "Miles Bridges",
+      20.5
+     ],
+     [
+      "Kel'el Ware",
+      28
+     ]
+    ],
+    "David": [
+     [
+      "Anthony Edwards",
+      39
+     ],
+     [
+      "Amen Thompson",
+      24.5
+     ],
+     [
+      "Keyonte George",
+      10
+     ],
+     [
+      "Jayson Tatum",
+      37
+     ],
+     [
+      "Paul George",
+      28
+     ],
+     [
+      "Kevin Durant",
+      21
+     ],
+     [
+      "Neemias Queta",
+      15.5
+     ],
+     [
+      "Myles Turner",
+      20.5
+     ],
+     [
+      "James Harden",
+      21
+     ]
+    ],
+    "Kyran": [
+     [
+      "Jalen Brunson",
+      32
+     ],
+     [
+      "Derrick White",
+      14
+     ],
+     [
+      "LaMelo Ball",
+      28
+     ],
+     [
+      "Jaylen Brown",
+      15
+     ],
+     [
+      "Scottie Barnes",
+      32
+     ],
+     [
+      "Naz Reid",
+      24
+     ],
+     [
+      "Nikola Jokic",
+      29
+     ],
+     [
+      "Andrew Nembhard",
+      17.5
+     ],
+     [
+      "Deni Avdija",
+      30
+     ]
+    ],
+    "Tony": [
+     [
+      "Cade Cunningham",
+      32
+     ],
+     [
+      "Devin Booker",
+      18.5
+     ],
+     [
+      "Trae Young",
+      16.5
+     ],
+     [
+      "Trey Murphy III",
+      20.5
+     ],
+     [
+      "Karl-Anthony Towns",
+      29
+     ],
+     [
+      "Evan Mobley",
+      17.5
+     ],
+     [
+      "Jabari Smith Jr.",
+      14.5
+     ],
+     [
+      "Zion Williamson",
+      28
+     ],
+     [
+      "Zach LaVine",
+      4.5
+     ]
+    ],
+    "Lewis": [
+     [
+      "Donovan Mitchell",
+      19.5
+     ],
+     [
+      "Immanuel Quickley",
+      24.5
+     ],
+     [
+      "Dyson Daniels",
+      15
+     ],
+     [
+      "OG Anunoby",
+      12
+     ],
+     [
+      "Anthony Davis",
+      31.5
+     ],
+     [
+      "Bam Adebayo",
+      29.5
+     ],
+     [
+      "Victor Wembanyama",
+      51
+     ],
+     [
+      "Darryn Peterson",
+      18.5
+     ],
+     [
+      "Julius Randle",
+      23
+     ]
+    ],
+    "Maxi": [
+     [
+      "Tyrese Maxey",
+      25
+     ],
+     [
+      "Cooper Flagg",
+      45.5
+     ],
+     [
+      "Stephen Curry",
+      42
+     ],
+     [
+      "Brandon Miller",
+      37
+     ],
+     [
+      "Domantas Sabonis",
+      29.5
+     ],
+     [
+      "Yaxel Lendeborg",
+      -0.5
+     ],
+     [
+      "Pascal Siakam",
+      27.5
+     ],
+     [
+      "Alex Sarr",
+      25
+     ],
+     [
+      "Derik Queen",
+      15
+     ]
+    ]
+   },
+   "isaac": {
+    "text": "Well well well we’re here again for another week of NBA in tah and with that comes of course last weeks recaps. An overwhelmingly poo week in terms of points averages in relation to last week but we move. Two new designations will be added in my recaps this week, Heaven and Hell. Heaven is reserved for someone who I think is undeservedly underperforming and needs a bit of Lady Luck on his side. Hell is for the opposite, someone who’s had a bit too much luck to get them to where they’re at.\n\nIsaac v David\nIn one of our biggest blowouts of the week David got absolutely spanked by yours truly. This is largely due to David still not having a proper grasp on the practical use of the lock in mechanics as 5 out of 9 players were locked in below their highest point totals of the week. Of course we must mourn the loss of Anthony Edwards for David who will be without his star guard for at least 1 month. New gen splash brothers didn’t last long. Also it must be noted that this game was won with the highest score achieved so far on NBA fantasy as I got a whopping 271 points.\n\nKyran v Tony\nIn a battle of poo for the ages we see the two K-town massives go head to head in a match up almost reminiscent of the western colonisation of the Asian sub continent. And much like those wars this game followed a similar trodden path as white colonised slightly less white. Kyran edged out a win despite some less than optimal managerial decisions. Some good 30 point plus performances across the team gave him the win here. Tony, why are we locking in a 16.5 bomb my Trae Young and why are we settling for a fat 17.5 from Evan Mobley. This truly was a managerial choke job akin to Hitlers Eastern Front campaign\n\nLewis v Maxi\nNow as of writing this this game hasn’t concluded quite yet however unless Julius randle drops 45 against the pacers tonight. Despite a whopping 51 point performance from Wemby Lewises guards and small forward let him down this week. OG Anunoby (or as he pronounces it “oguh anoonabie) was the real disappointment looking like a lost baby on the court this week. This isn’t to detract from a good performance from maxi led by some 40+ performances from cooper Flagg, Steph Curry and Brandon Miller. However, in a very strange turn of events Maxi locked in a -0.5 performance from Yaxel Lendebourg despite him having still to play a game this week(??). Strange way to flex on your opponent but okay.\n\nJack Hill v Matt\nThis is unfortunately a big blowout in jacks favour as he commanded his team to a comprehensive win and a good managerial performance. Trust me it hurts for me to say this but he did a good job. Picking up Acoff actually did turn out to be a good decision and the lock ins were pretty much on point. Unlucky from Matt and honestly not much to say about this one. Very unlucky for Matt with Kawhi Leonard and Jaren Jackson Jr going down with injuries.\n\nAnd now for the awards\nBiggest Chud: Tonysan\nShit vs Poo award: Kyransan v Tonysan\nHoly Glaze of the Week: Me\nHeaven: Gonzalez\nHell: GPT",
+    "awards": {
+     "Biggest Chud": "Tony",
+     "Shit vs Poo": "Kyran vs Tony",
+     "Holy Glaze": "Isaac",
+     "Heaven": "Matt",
+     "Hell": "Jack"
+    }
+   },
+   "sleeper_report": {
+    "best_team": [
+     "Isaac",
+     271.0
+    ],
+    "worst_team": [
+     "Tony",
+     181.0
+    ],
+    "top_picks": [
+     [
+      "PG",
+      "Stephen Curry",
+      "Maxi",
+      42.0,
+      "@ MIN"
+     ],
+     [
+      "SG",
+      "Cooper Flagg",
+      "Maxi",
+      45.5,
+      "@ MIA"
+     ],
+     [
+      "SF",
+      "Jayson Tatum",
+      "David",
+      37.0,
+      "vs BKN"
+     ],
+     [
+      "PF",
+      "Giannis Antetokounmpo",
+      "Jack",
+      43.0,
+      "vs DAL"
+     ],
+     [
+      "C",
+      "Victor Wembanyama",
+      "Lewis",
+      51.0,
+      "@ UTA"
+     ]
+    ],
+    "awards": [
+     [
+      "Most efficient manager",
+      "Matt",
+      205.5,
+      "max 230.00"
+     ],
+     [
+      "Least efficient manager",
+      "Tony",
+      181.0,
+      "max 244.00"
+     ],
+     [
+      "Highest points in a loss",
+      "Lewis",
+      224.5,
+      "vs Maxi 246.00"
+     ],
+     [
+      "Lowest points in a win",
+      "Kyran",
+      221.5,
+      "vs Tony 181.00"
+     ]
+    ],
+    "top_fas": [
+     [
+      "PG",
+      "Jeremiah Fears",
+      "NOP",
+      26.0
+     ],
+     [
+      "SG",
+      "Cam Spencer",
+      "MEM",
+      21.5
+     ],
+     [
+      "SF",
+      "Devin Vassell",
+      "SAS",
+      20.17
+     ],
+     [
+      "PF",
+      "De'Andre Hunter",
+      "SAC",
+      18.33
+     ],
+     [
+      "C",
+      "Moussa Diabaté",
+      "CHA",
+      21.75
+     ]
+    ],
+    "pick_performance": [
+     [
+      "Isaac",
+      271.0,
+      312.5
+     ],
+     [
+      "Jack",
+      260.5,
+      295.5
+     ],
+     [
+      "Maxi",
+      246.0,
+      293.0
+     ],
+     [
+      "Lewis",
+      224.5,
+      256.0
+     ],
+     [
+      "Kyran",
+      221.5,
+      248.5
+     ],
+     [
+      "David",
+      216.5,
+      243.0
+     ],
+     [
+      "Matt",
+      205.5,
+      230.0
+     ],
+     [
+      "Tony",
+      181.0,
+      244.0
+     ]
+    ],
+    "matchup_mvp": [
+     [
+      "Jack",
+      260.5,
+      222.41,
+      3,
+      0
+     ],
+     [
+      "Matt",
+      205.5,
+      203.11,
+      6,
+      0
+     ],
+     [
+      "Isaac",
+      271.0,
+      210.49,
+      6,
+      1
+     ],
+     [
+      "David",
+      216.5,
+      203.49,
+      3,
+      0
+     ],
+     [
+      "Kyran",
+      221.5,
+      222.19,
+      4,
+      2
+     ],
+     [
+      "Tony",
+      181.0,
+      218.99,
+      3,
+      4
+     ],
+     [
+      "Lewis",
+      224.5,
+      213.38,
+      4,
+      1
+     ],
+     [
+      "Maxi",
+      246.0,
+      210.87,
+      4,
+      0
+     ]
+    ],
+    "standings": [
+     [
+      "Jack",
+      "2-0",
+      529.0,
+      389.0
+     ],
+     [
+      "Kyran",
+      "2-0",
+      487.0,
+      441.5
+     ],
+     [
+      "Maxi",
+      "2-0",
+      462.5,
+      428.5
+     ],
+     [
+      "Isaac",
+      "1-1",
+      531.5,
+      482.0
+     ],
+     [
+      "Lewis",
+      "1-1",
+      495.0,
+      459.0
+     ],
+     [
+      "David",
+      "0-2",
+      420.5,
+      487.5
+     ],
+     [
+      "Matt",
+      "0-2",
+      418.5,
+      531.0
+     ],
+     [
+      "Tony",
+      "0-2",
+      364.5,
+      490.0
+     ]
+    ]
+   },
+   "claude": {
+    "text": "Isaac's 271 was the week's best (Şengün 41, Boozer 38.5). Maxi beat Lewis 246–224.5 behind Flagg 45.5 and Curry 42, so Wemby's 51 wasn't enough, and that was with a −0.5 troll lock. Tony's LaVine slot finished on 4.5 after a 25 earlier in the week, and his 181 was the week's low. Jack beat Matt by 55 with Porter 33.5 and Giannis 43. Matt was Sleeper's most efficient manager (89.3% of max) and still lost.",
+    "awards": {
+     "Biggest Chud": "Tony",
+     "Holy Glaze": "Isaac",
+     "Heaven": "Matt",
+     "Hell": "Kyran"
+    }
+   }
+  },
+  "3": {
+   "matchups": [
+    [
+     "Jack",
+     279,
+     "Kyran",
+     274
+    ],
+    [
+     "Tony",
+     194.5,
+     "David",
+     213.5
+    ],
+    [
+     "Matt",
+     230,
+     "Maxi",
+     232.5
+    ],
+    [
+     "Isaac",
+     262.5,
+     "Lewis",
+     276.5
+    ]
+   ],
+   "locks": {
+    "Jack": [
+     [
+      "Jamal Murray",
+      32.5
+     ],
+     [
+      "Ty Jerome",
+      33.5
+     ],
+     [
+      "Dejounte Murray",
+      26.5
+     ],
+     [
+      "Michael Porter Jr.",
+      25
+     ],
+     [
+      "Giannis Antetokounmpo",
+      42.5
+     ],
+     [
+      "Cedric Coward",
+      31.5
+     ],
+     [
+      "Walker Kessler",
+      29.5
+     ],
+     [
+      "Darius Acuff Jr.",
+      29.5
+     ],
+     [
+      "Donovan Clingan",
+      28.5
+     ]
+    ],
+    "Kyran": [
+     [
+      "Jalen Brunson",
+      25
+     ],
+     [
+      "Derrick White",
+      22
+     ],
+     [
+      "LaMelo Ball",
+      26
+     ],
+     [
+      "Jaylen Brown",
+      34.5
+     ],
+     [
+      "Scottie Barnes",
+      37
+     ],
+     [
+      "Naz Reid",
+      26
+     ],
+     [
+      "Nikola Jokic",
+      46.5
+     ],
+     [
+      "Joel Embiid",
+      28
+     ],
+     [
+      "Deni Avdija",
+      29
+     ]
+    ],
+    "Tony": [
+     [
+      "Cade Cunningham",
+      35.5
+     ],
+     [
+      "Devin Booker",
+      20
+     ],
+     [
+      "Trae Young",
+      11
+     ],
+     [
+      "Trey Murphy III",
+      18.5
+     ],
+     [
+      "Karl-Anthony Towns",
+      37.5
+     ],
+     [
+      "Evan Mobley",
+      17.5
+     ],
+     [
+      "Jabari Smith Jr.",
+      26
+     ],
+     [
+      "Zion Williamson",
+      16.5
+     ],
+     [
+      "Zach LaVine",
+      12
+     ]
+    ],
+    "David": [
+     [
+      "James Harden",
+      29
+     ],
+     [
+      "Keyonte George",
+      24.5
+     ],
+     [
+      "Damian Lillard",
+      11
+     ],
+     [
+      "Jayson Tatum",
+      36.5
+     ],
+     [
+      "Paul George",
+      25
+     ],
+     [
+      "Kevin Durant",
+      26
+     ],
+     [
+      "Paul Reed",
+      12
+     ],
+     [
+      "Myles Turner",
+      24
+     ],
+     [
+      "Darius Garland",
+      25.5
+     ]
+    ],
+    "Matt": [
+     [
+      "Shai Gilgeous-Alexander",
+      40.5
+     ],
+     [
+      "Kyrie Irving",
+      30
+     ],
+     [
+      "Mikal Bridges",
+      19
+     ],
+     [
+      "LeBron James",
+      28
+     ],
+     [
+      "Andrew Wiggins",
+      11
+     ],
+     [
+      "Ausar Thompson",
+      28.5
+     ],
+     [
+      "Rudy Gobert",
+      20
+     ],
+     [
+      "Stephon Castle",
+      20
+     ],
+     [
+      "Onyeka Okongwu",
+      33
+     ]
+    ],
+    "Maxi": [
+     [
+      "Tyrese Maxey",
+      34.5
+     ],
+     [
+      "Cooper Flagg",
+      25.5
+     ],
+     [
+      "Stephen Curry",
+      31.5
+     ],
+     [
+      "Brandon Miller",
+      9
+     ],
+     [
+      "Domantas Sabonis",
+      22
+     ],
+     [
+      "Yaxel Lendeborg",
+      29
+     ],
+     [
+      "Moussa Diabate",
+      22.5
+     ],
+     [
+      "Caleb Wilson",
+      31
+     ],
+     [
+      "Derik Queen",
+      27.5
+     ]
+    ],
+    "Isaac": [
+     [
+      "Luka Doncic",
+      49
+     ],
+     [
+      "Tyler Herro",
+      28
+     ],
+     [
+      "Austin Reaves",
+      24
+     ],
+     [
+      "Franz Wagner",
+      32.5
+     ],
+     [
+      "Alperen Sengun",
+      39.5
+     ],
+     [
+      "Cameron Boozer",
+      18
+     ],
+     [
+      "Isaiah Hartenstein",
+      23.5
+     ],
+     [
+      "Miles Bridges",
+      28
+     ],
+     [
+      "Jeremiah Fears",
+      20
+     ]
+    ],
+    "Lewis": [
+     [
+      "Donovan Mitchell",
+      29
+     ],
+     [
+      "Tari Eason",
+      10
+     ],
+     [
+      "Dyson Daniels",
+      26
+     ],
+     [
+      "OG Anunoby",
+      19
+     ],
+     [
+      "Anthony Davis",
+      34
+     ],
+     [
+      "Bam Adebayo",
+      35
+     ],
+     [
+      "Victor Wembanyama",
+      76.5
+     ],
+     [
+      "Darryn Peterson",
+      27
+     ],
+     [
+      "Julius Randle",
+      20
+     ]
+    ]
+   },
+   "isaac": {
+    "text": "Right guys we’re back with the third NBA in Tah weekly recap. A week of records broken and forgetful picks has thrust us into a situation in which the two remaining undefeated teams are the highest overall points scorer and strangely the fifth highest point scorer, some may argue schedules been a bit of a help here. Anyways, on to the weekly recap and of course the all hallowed, shrouded in gold, weekly awards.\n\nIsaac v Lewis\nTo kick things off we have one of the highest scoring games of the season so far as Lewis and I put up a combined 539 points between us with only a 14 point difference between the teams. Lewis edged the victory obviously with a stormer of a performance from Wemby as he dropped the second highest fantasy NBA point score of all time, just behind Hakeem Olajuwon in 1987. Wemby had a truly napoleonic performance as he raped and ravaged the Mavericks with 52 points and 24 rebounds among some other ridiculous statlines. Whilst I put up a good performance it just wasn’t enough to stop the alien invasion, I could have won if I did the right picks but of course key word there is “if”.\n\nKyran v Jack\nThis is actually our highest ever scoring NBA in Tah game as both sides beat the previous record for highest points in a week. In a 553 point neck and neck race the winner was unfortunately Jack despite him being in commissioner designated hell all week. This was essentially just good picks and good games all round for both of these guys as Kyrans lowest scoring player was Derrick White dropping 22 against the bucks and Jacks being MPJ who dropped 25 on charlotte. This just goes to show that you don’t just need individual outstanding performances to win in this league but rather a whole team of consistent dubs. I think this may be the Strat going forwards. Alas Jack secures yet another win and Kyran loses the 0 in his loss column. A top table battle for the ages.\n\nTony v David\nIn our battle of poo for the week we saw the two lowest scoring teams in the league go head to head in an absolutely shocking game week. The trend of Tony only locking in players if they’re going to have a better game in their next one continues in a way as he locked in Trey Murphy on an 18.5 the night he dropped 24 on the clippers. Although I will give to him that he locked in cade right before he had a stinker. David just managed to get over the line on this one but Tony would have been able to put up an actual good performance had he realised that the game week was actually going on. All in all too David had some pretty wank performances from some of his players but I guess it doesn’t matter if the guy you’re playing forgets to lock people in.\n\nMatt v Maxi\nThis is the closest matchup we’ve seen as just 2.5 points separated Matt and Maxi. I think this is the type of game where it’s just all down to either luck or injuries. Whoever has the less injured team or whoever gets the luckiest ends up winning and thats just a shame for those like Matt who have been on the wrong end of Lady Lucks stick so far this season. Both teams had clean games and ended up scoring a pretty bang average week. Of course this has left Maxi as one of the two only undefeated teams left and left Matt as one of only two winless teams despite Matt only having scored 50 less points than Maxi on the season. Despite being in heaven for this week Matt remains the statistically most scored against player in the league and the worst part of that is that there is absolutely nothing he can do it about it. A good win by Maxi but ultimately the biggest toss up of the league so far this week.\n\nAnd now for the all important awards section. We have our first two time winners for a few categories here so buckle up\nBiggest Chud: Tonysan (for the second week running)\nShit vs Poo Award: Tony v David (both have already won this award)\nHoly Glaze of the week: Jack (279 points is too high to ignore)\nHeaven: Matt Gonzalez\nHell: Lewis (fuck wemby)\n\nThat wraps up the weekly recap, don’t forget to set your lineups for this week and lock in the good pefrformances not the bad ones… Tony",
+    "awards": {
+     "Biggest Chud": "Tony",
+     "Shit vs Poo": "Tony vs David",
+     "Holy Glaze": "Jack",
+     "Heaven": "Matt",
+     "Hell": "Lewis"
+    }
+   },
+   "claude": {
+    "text": "Jack 279 beat Kyran 274 by 5: Giannis 42.5, Jerome 33.5, Jamal 32.5, and a Porter 25 lock that left Kyran needing 27.5 from his SG slot (White gave 22). Wemby's 76.5, the best single score of the season, carried Lewis past Isaac 276.5–262.5. Maxi beat Matt by 2.5 for a third win while sitting fourth in points. David beat Tony for his first win; Tony let six slots run to their final game, including Trae's 11 after three straight 20s.",
+    "awards": {
+     "Biggest Chud": "Tony",
+     "Holy Glaze": "Lewis",
+     "Heaven": "Matt",
+     "Hell": "Maxi"
+    }
+   }
+  }
+ },
+ "manager_notes": {
+  "Jack": {
+   "rank": 1,
+   "tag": "The deep stack",
+   "style": "Active on waivers with the best pickups in the league. Mixed early/mid locks. Wins through depth: most 30+ games in the league.",
+   "top": [
+    "Giannis counted for 40+ every week (40.5, 43, 42.5)",
+    "Acuff pickup: highest average since being added of any pickup in the league",
+    "Porter 25 lock that beat Kyran by 5 in week 3",
+    "Week 1: Jamal 39 and Kessler 39 in a 268.5–183.5 win over Tony",
+    "3–0 and top of the league in points"
+   ],
+   "bot": [
+    "Clingan's 38 left on the bench (week 3)",
+    "Started Jalen Johnson and Dejounte on Monday of week 3; neither played",
+    "Jalen Johnson finished on 16 in week 2 after passing on a 25 and a 28",
+    "Buzelis 17.5 in week 1",
+    "Dropped RJ Barrett preseason; he's now Kyran's 20-a-game starter"
+   ]
+  },
+  "Kyran": {
+   "rank": 2,
+   "tag": "The sniper",
+   "style": "Best locker in the league. Locks strong numbers early, holds stars (Jokić) for bigger ones. Small, smart pickups.",
+   "top": [
+    "Jokić 53.5 locked in week 1",
+    "Week 1: 8 of 9 slots got the player's best game of the week, 265.5 to beat Isaac",
+    "Jokić 46.5 in week 3: held his 39 and got 7.5 more",
+    "Barrett pickup (20.6) for Vučević (5.4)",
+    "Barnes locked at 35+ twice"
+   ],
+   "bot": [
+    "Lost to Jack by 5 in week 3; SG slot never hit",
+    "Week 2: Jokić finished on 29 after passing on a 37 and a 34",
+    "Brown counted for 15 in week 2",
+    "Nembhard left unlocked at 17.5 in week 2",
+    "White's 14 and 18 in guard slots"
+   ]
+  },
+  "Isaac": {
+   "rank": 3,
+   "tag": "The unlucky superteam",
+   "style": "Most active on waivers. Locks early and leaves upside on the table. Second in points with a 1–2 record.",
+   "top": [
+    "Luka 53 locked in week 1",
+    "Luka 49 in week 3",
+    "271 in week 2, the fourth-highest week of the season",
+    "Şengün 41 and 39.5",
+    "Fears, Dosunmu pickups and Morant stashed on IR"
+   ],
+   "bot": [
+    "Lost week 1 to Kyran by 5",
+    "Lost week 3 with 262.5 to Wemby's 76.5",
+    "Locked Luka at 38.5; Luka then scored 55.5",
+    "Locked Miles Bridges at 20.5; he then scored 35",
+    "1–2 with the second-most points"
+   ]
+  },
+  "Lewis": {
+   "rank": 4,
+   "tag": "One-man army",
+   "style": "Passive on waivers. Locks mostly early or mid-week. Rides Wemby.",
+   "top": [
+    "Wemby 76.5 locked, the best single score of the season",
+    "Wemby 51 in week 2",
+    "Anthony Davis 38.5 in week 1",
+    "270.5 in week 1 to beat Matt",
+    "Beat Isaac in week 3"
+   ],
+   "bot": [
+    "Lost week 2 despite Wemby's 51",
+    "Holmgren's tendon injury",
+    "Eason 10 and Anunoby 12 locked",
+    "Locked Daniels at 25; he then scored 35.5",
+    "Coby White averaging 5 in his games so far"
+   ]
+  },
+  "Maxi": {
+   "rank": 5,
+   "tag": "Stars and chaos",
+   "style": "Locks the first good game more than anyone in the league, and leaves upside behind. Smart pickups. Troll locks when it doesn't matter. 3–0 with the 4th-most points.",
+   "top": [
+    "Flagg 45.5",
+    "Curry 42",
+    "Lendeborg pickup (22.9, best 35)",
+    "Beat Lewis in week 2 despite Wemby's 51",
+    "Miller 37 and a 3–0 start"
+   ],
+   "bot": [
+    "Troll locks: Curry 0, Lendeborg −0.5",
+    "Miller finished on 9 in week 3",
+    "Banchero out 4–6 weeks",
+    "Locked Sabonis at 34; he then scored 43.5",
+    "4th in points while 3–0; beat Matt by 2.5"
+   ]
+  },
+  "Matt": {
+   "rank": 6,
+   "tag": "Good manager, cursed roster",
+   "style": "Solid locker: more slots got the player's best game of the week than any other manager. Passive on waivers until week 4. Wrecked by injuries.",
+   "top": [
+    "SGA 40.5",
+    "SGA 37.5",
+    "Lost week 3 by only 2.5 on an injured roster",
+    "Okongwu 33",
+    "Haliburton 31–32 before getting hurt"
+   ],
+   "bot": [
+    "Empty slot in week 1 (Ausar Thompson 0)",
+    "Jaren Jackson Jr. torn MCL",
+    "Haliburton and Kawhi injured",
+    "Okongwu counted for 15 in a week he scored 35.5",
+    "0–3, and the Melton pickup (11)"
+   ]
+  },
+  "David": {
+   "rank": 7,
+   "tag": "Passenger",
+   "style": "More slots finish on the player's final game than anyone else, so big early games get missed. Churned waivers without improving.",
+   "top": [
+    "Tatum 39.5",
+    "Edwards 39 in week 2",
+    "Tatum 37 and 36.5",
+    "First win, over Tony",
+    "Keyonte George 30"
+   ],
+   "bot": [
+    "Edwards scored 45 early in week 1; the slot finished on his 14",
+    "Edwards' knee surgery",
+    "Lillard/Jabari Smith churn kept the worse player",
+    "Paul George scored 37.5 in week 1; the slot finished on his 21",
+    "Keyonte George 10 left unlocked"
+   ]
+  },
+  "Tony": {
+   "rank": 8,
+   "tag": "Checked out",
+   "style": "Most points left on the table in the league. Locks low early, chases badly, and six week-3 slots finished on the player's final game. One good pickup in week 1, then nothing.",
+   "top": [
+    "Towns 37.5",
+    "Cade 35.5",
+    "Cade 32",
+    "Jabari Smith Jr. pickup (21.7)",
+    "Zion 28"
+   ],
+   "bot": [
+    "LaVine finished on 4.5 in week 2, after a 25 earlier that week",
+    "Trae ended on 11 after games of 19.5, 20 and 20",
+    "Booker locked at 17.5 in week 1, then scored 35.5",
+    "0–3, and 75 points behind the next-lowest team",
+    "Porziņģis away from the Warriors (ESPN: considering retirement); DeRozan below 15 in 86% of games"
+   ]
+  }
+ }
+}

@@ -35,6 +35,7 @@ def slim_player(p):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="data/live.json")
+    ap.add_argument("--light", action="store_true", help="alerts only: skip matchups, transactions, projections, stats")
     a = ap.parse_args()
     old = json.load(open(a.out)) if os.path.exists(a.out) else {}
     out, err = dict(old), {}
@@ -50,11 +51,12 @@ def main():
     run("league", lambda: get(f"https://api.sleeper.app/v1/league/{LEAGUE}"))
     run("users", lambda: get(f"https://api.sleeper.app/v1/league/{LEAGUE}/users"))
     run("rosters", lambda: get(f"https://api.sleeper.app/v1/league/{LEAGUE}/rosters"))
-    run("matchups", lambda: {str(w): get(f"https://api.sleeper.app/v1/league/{LEAGUE}/matchups/{w}") for w in range(1, week + 1)})
-    run("transactions", lambda: {str(w): get(f"https://api.sleeper.app/v1/league/{LEAGUE}/transactions/{w}") for w in range(1, week + 1)})
+    heavy = not a.light
+    heavy and run("matchups", lambda: {str(w): get(f"https://api.sleeper.app/v1/league/{LEAGUE}/matchups/{w}") for w in range(1, week + 1)})
+    heavy and run("transactions", lambda: {str(w): get(f"https://api.sleeper.app/v1/league/{LEAGUE}/transactions/{w}") for w in range(1, week + 1)})
     run("trending", lambda: get("https://api.sleeper.app/v1/players/nba/trending/add?lookback_hours=24&limit=25"))
 
-    run("proj", lambda: [{"pid": r["player_id"], "date": r["date"], "team": r.get("team"), "opp": r.get("opponent"), "stats": r["stats"]}
+    heavy and run("proj", lambda: [{"pid": r["player_id"], "date": r["date"], "team": r.get("team"), "opp": r.get("opponent"), "stats": r["stats"]}
                          for r in get(f"https://api.sleeper.com/projections/nba/{out['state']['season']}/{week}?season_type=regular&{POS}")
                          if r.get("stats") and r.get("player_id")])
     # rebuild the players table from the freshest rosters + projections
@@ -67,7 +69,7 @@ def main():
     except Exception as e:
         err["players"] = f"{type(e).__name__}: {e}"
 
-    run("stats", lambda: {str(w): [{"pid": r["player_id"], "date": r["date"], "stats": r["stats"]}
+    heavy and run("stats", lambda: {str(w): [{"pid": r["player_id"], "date": r["date"], "stats": r["stats"]}
                                    for r in get(f"https://api.sleeper.com/stats/nba/{out['state']['season']}/{w}?season_type=regular&{POS}")
                                    if r.get("stats") and r.get("player_id")]
                           for w in range(1, week + 1)})

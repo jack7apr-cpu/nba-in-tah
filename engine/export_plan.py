@@ -14,7 +14,16 @@ def team_plan(L, M, Rq, name, w, today):
     mm = [m for m in (N.load(f"{L.d}/matchups/week_{w:02d}.json") or []) if m["roster_id"] == rid]
     starters = set(mm[0]["starters"]) if mm else set(ro.get("starters") or [])
     ids = [p for p in ro["players"] if p not in (ro.get("reserve") or [])]
-    out, reg, val = K.plan(L, M, Rq, ids, starters, w, today)
+    fixed = None
+    order = ["PG", "SG", "G", "SF", "PF", "F", "C", "UTIL", "UTIL"]   # Sleeper's lineup order
+    if mm and len(mm[0]["starters"]) == 9:
+        fixed, taken = {}, set()
+        for name, pid in zip(order, mm[0]["starters"]):
+            i = next(i for i, sn in enumerate(K.SLOTS) if sn == name and i not in taken)
+            taken.add(i)
+            if pid in ids:
+                fixed[f"{name}{i}"] = pid
+    out, reg, val = K.plan(L, M, Rq, ids, starters, w, today, fixed=fixed)
     slots = []
     for s, p, v, seq in out:
         ch = []

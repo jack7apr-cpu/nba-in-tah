@@ -1,11 +1,11 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
+const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -34,7 +34,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup,fun})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup,fun,moves})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -211,3 +211,12 @@ function fun(){const fs=funStats(),T=awardTally(),weeks=Object.keys(D.wk).sort((
   <h3 style="margin-top:20px">Head to head</h3>${chips("h1",D.rank,a)}${chips("h2",D.rank,b)}
   <div class="card"><div class="row" style="font-weight:700"><span class="sp mut"></span><span style="width:90px;text-align:right">${a}</span><span style="width:90px;text-align:right">${b}</span></div>${rows.map(([t,f])=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp mut">${t}</span><span class="num" style="width:90px;text-align:right">${f(a)}</span><span class="num" style="width:90px;text-align:right">${f(b)}</span></div>`).join("")}${met?`<div class="sub" style="margin-top:8px">Played each other: ${met}</div>`:'<div class="sub" style="margin-top:8px">Not played yet.</div>'}</div>
   <h3 style="margin-top:20px">🏅 Isaac's awards tally</h3><div class="card tw"><table><tr><th>Manager</th>${AW.map(k=>`<th>${k.replace("Biggest ","").replace("Shit vs Poo","S v P")}</th>`).join("")}</tr>${awRows}</table></div>`}
+
+/* MOVES: matchup stance + free agents */
+function moves(){const X=D.FA;if(!X)return '<div class="card warn">Not built yet.</div>';const m=X.matchup;
+  return `<h2>🔁 Moves</h2>${m?`<div class="card"><div class="lbl">Your week ${X.week} vs ${esc(m.opp)}</div><div class="big" style="color:${m.p_win>=.5?"var(--gr)":"var(--rd)"}">${Math.round(m.p_win*100)}% to win</div>
+  <div class="sub">Expected locked totals: you ${m.mine} · ${esc(m.opp)} ${m.theirs}</div><div style="margin-top:8px"><b>Lock stance:</b> ${esc(m.stance)}</div>
+  <div class="sub" style="margin-top:6px">Sleeper's own box shows a closer game because it uses single-game projections. This number assumes both of you lock sensibly, so ${esc(m.opp)} (who barely uses locks) is probably weaker than shown. A heuristic on top of the model.</div></div>`:""}
+  <h3 style="margin-top:18px">Free agents worth adding</h3><div class="sub">Best add/drop for your lineup. <b>Rest of season</b> and <b>this week</b> are the change in your best-lineup Lock-In points. Streamers show up in "this week".</div>
+  <div class="card list">${X.fa.map(f=>`<div class="it" style="display:block"><div class="row"><b>Add ${esc(f.add)}</b><span class="pill">${(f.pos||[]).join("/")}</span><span class="sp"></span><span class="num pos">+${f.ros} ros</span></div><div class="sub">drop ${esc(f.drop)} · this week ${f.week>=0?"+":""}${f.week} · value ${f.value}</div></div>`).join("")||'<div class="sub">No pickup beats your current bench.</div>'}</div>
+  <div class="sub" style="margin-top:8px">Waivers are rolling, so claims run in priority order. Check the player isn't hurt or on a back-to-back before claiming.</div>`}

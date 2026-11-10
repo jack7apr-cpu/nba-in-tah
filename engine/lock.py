@@ -62,7 +62,7 @@ def positions(L, pid):
     return set((L.pinfo.get(pid) or {}).get("fantasy_positions") or [])
 
 
-def plan(L, M, Rq, roster_ids, starters, w, today, locked=None, espn=None):
+def plan(L, M, Rq, roster_ids, starters, w, today, locked=None, espn=None, fixed=None):
     """assign regulars to slots by lock-value, then fill idle nights with bench free rolls."""
     locked = locked or {}
     dates = [d for d in week_dates(w) if d >= today]
@@ -94,6 +94,8 @@ def plan(L, M, Rq, roster_ids, starters, w, today, locked=None, espn=None):
         cands = [p for p in free if positions(L, p) & OK[s] and p not in reg.values()]
         if cands:
             reg[key] = max(cands, key=lambda p: (val[p], p in starters))
+    if fixed:   # keep the manager's real slot assignment instead of re-optimising it
+        reg = {k: v for k, v in fixed.items() if k not in locked and v in free}
     bench = [p for p in free if p not in reg.values()]
     out = []
     used = {d: set() for d in dates}

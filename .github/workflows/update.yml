@@ -34,6 +34,8 @@ jobs:
           python almanac/build_auto.py --live site/data/live.json --facts site/data/factfile.json --out site/data/auto.json
           python almanac/build_weeks.py --live site/data/live.json --out site/data/weeks_auto.json
           python almanac/export_xlsx.py --data site/data --out site/almanac.xlsx
+      - name: Cache-bust the app files
+        run: sed -i "s/?v=dev/?v=$(date +%s)/g" site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

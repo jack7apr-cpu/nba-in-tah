@@ -4,7 +4,7 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["guide","📖","Guide"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries","guide","values"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL,GD,TV])=>{
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries","guide","values"].map(n=>fetch(`data/${n}.json?t=${Date.now()}`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL,GD,TV])=>{
   D.GD=GD; D.TV=TV;
   D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; D.FM=FM; D.SAL=SAL; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });

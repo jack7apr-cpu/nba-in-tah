@@ -25,13 +25,15 @@ main.textColor = new Color(locks.length ? "#35e0a1" : "#e9edf8");
 main.minimumScaleFactor = 0.6;
 
 if (plan) {
+  // next lock thresholds, soonest game first (ties: most valuable slot first), not already locked
   const next = plan.teams[ME].slots
     .map(s => ({ s, c: s.chances[0] }))
-    .filter(x => x.c && x.c.act === "IF")
-    .sort((a, b) => b.s.worth - a.s.worth)[0];
-  if (next) {
-    w.addSpacer(4);
-    const n = w.addText(next.s.player.split(" ").slice(-1)[0] + " lock at " + next.c.th + "+");
+    .filter(x => x.c && x.c.act === "IF" && !done.has(x.s.player))
+    .sort((a, b) => a.c.date.localeCompare(b.c.date) || b.s.worth - a.s.worth)
+    .slice(0, 3);
+  for (const x of next) {
+    w.addSpacer(3);
+    const n = w.addText(x.c.date.slice(5) + " " + x.s.player.split(" ").slice(-1)[0] + " " + x.c.th + "+");
     n.font = Font.systemFont(12); n.textColor = new Color("#8b95b3");
   }
 }

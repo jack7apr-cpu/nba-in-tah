@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -69,8 +69,8 @@ function drawQuad(){
 /* WEEKS */
 function weeks(){
   const ws=[...new Set([...Object.keys(D.L.weeks),...Object.keys(D.A)].map(Number))].sort((a,b)=>a-b);
-  if(!D.L.weeks[S.wk]){const A=D.A[S.wk]||{matchups:[]};after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-au]").forEach(c=>c.onclick=()=>autoSheet(+c.dataset.au))};
-    return `${chips("wkc",ws.map(x=>"Week "+x),"Week "+S.wk)}<div class="card warn" style="margin-bottom:12px">${A.status==="live"?"Live week":"Week not yet curated"}: scores come straight from Sleeper's API and can differ from the official Lock-In counted totals. The official numbers and Isaac's recap land after the week ends.</div><div class="grid g2">${A.matchups.map(([a,b],i)=>`<div class="card tap" data-au="${i}"><div class="row"><b ${a.pts>b.pts?'style="color:var(--gr)"':""}>${a.mgr}</b><span class="sp"></span><span class="num">${a.pts}</span></div><div class="row"><b ${b.pts>a.pts?'style="color:var(--gr)"':""}>${b.mgr}</b><span class="sp"></span><span class="num">${b.pts}</span></div><div class="sub" style="margin-top:6px">tap for slots</div></div>`).join("")||'<div class="card sub">No matchups yet.</div>'}</div>`}
+  if(!D.L.weeks[S.wk]){const A=JSON.parse(JSON.stringify(D.A[S.wk]||{matchups:[]})),OF=D.O?.weeks?.[S.wk];if(OF){A.status="official";for(const [a,b] of A.matchups){a.pts=OF[a.mgr]??a.pts;b.pts=OF[b.mgr]??b.pts}}after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-au]").forEach(c=>c.onclick=()=>autoSheet(+c.dataset.au))};
+    return `${chips("wkc",ws.map(x=>"Week "+x),"Week "+S.wk)}<div class="card warn" style="margin-bottom:12px">${A.status==="official"?"Official team totals (Sleeper season points, matches the official Lock-In scores). Slot-by-slot locks and Isaac's recap are added after the week.":A.status==="live"?"Live week: scores come straight from Sleeper's API and can differ from the official Lock-In counted totals. Official totals appear automatically when the week settles.":"Week not yet curated: raw API scores."}</div><div class="grid g2">${A.matchups.map(([a,b],i)=>`<div class="card tap" data-au="${i}"><div class="row"><b ${a.pts>b.pts?'style="color:var(--gr)"':""}>${a.mgr}</b><span class="sp"></span><span class="num">${a.pts}</span></div><div class="row"><b ${b.pts>a.pts?'style="color:var(--gr)"':""}>${b.mgr}</b><span class="sp"></span><span class="num">${b.pts}</span></div><div class="sub" style="margin-top:6px">tap for slots</div></div>`).join("")||'<div class="card sub">No matchups yet.</div>'}</div>`}
   const w=D.L.weeks[S.wk]; after.weeks=()=>{bindChips("wkc",v=>{S.wk=+v.replace("Week ","");route()});document.querySelectorAll("[data-mu]").forEach(c=>c.onclick=()=>muSheet(+c.dataset.mu))};
   const aw=w.isaac?.awards||{};
   return `${chips("wkc",ws.map(x=>"Week "+x),"Week "+S.wk)}

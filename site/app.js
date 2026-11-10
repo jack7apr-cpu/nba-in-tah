@@ -21,8 +21,9 @@ function prep(){
   $("#nav").innerHTML=TABS.map(([k,i,t])=>`<a href="#${k}" data-k="${k}"><b>${i}</b>${t}</a>`).join("");
 }
 const lockKey=()=>"locked-"+(D.P?.week??"");
-function lockedSet(){const set=new Set(D.K&&D.K.week===D.P?.week?D.K.players:[]);try{for(const n of JSON.parse(localStorage.getItem(lockKey())||"[]"))set.add(n)}catch(e){}return set}
-function toggleLock(n){let a=[];try{a=JSON.parse(localStorage.getItem(lockKey())||"[]")}catch(e){}const i=a.indexOf(n),on=i<0;on?a.push(n):a.splice(i,1);try{localStorage.setItem(lockKey(),JSON.stringify(a))}catch(e){}syncLock(n,on);route()}
+function ls(k){try{return JSON.parse(localStorage.getItem(k+lockKey())||"[]")}catch(e){return []}}
+function lockedSet(){const set=new Set(D.K&&D.K.week===D.P?.week?D.K.players:[]);for(const n of ls("on-"))set.add(n);for(const n of ls("off-"))set.delete(n);return set}
+function toggleLock(n){const on=!lockedSet().has(n);let a=ls("on-"),b=ls("off-");a=a.filter(x=>x!==n);b=b.filter(x=>x!==n);(on?a:b).push(n);try{localStorage.setItem("on-"+lockKey(),JSON.stringify(a));localStorage.setItem("off-"+lockKey(),JSON.stringify(b))}catch(e){}syncLock(n,on);route()}
 function syncLock(n,on){let k="";try{k=localStorage.getItem("synckey")||"";if(!k){k=(prompt("Paste your sync key once (lets GitHub and Claude see what you lock). Cancel to keep it on this phone only.")||"").trim();if(k)localStorage.setItem("synckey",k)}}catch(e){}
   if(!k)return;fetch("https://ntfy.sh/"+encodeURIComponent(k),{method:"POST",body:JSON.stringify({w:D.P?.week,p:n,l:on})}).then(()=>toast(on?"Locked sent":"Undo sent")).catch(()=>toast("Could not sync"))}
 function toast(t){const e=document.createElement("div");e.className="tt";e.style.cssText="left:50%;bottom:90px;transform:translateX(-50%);position:fixed";e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),1800)}

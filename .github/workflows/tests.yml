@@ -1,0 +1,27 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the data the tests read
+        run: |
+          python engine/collect.py --out site/data/live.json
+          python engine/fetch_raw.py
+          python engine/export_plan.py --out site/data/plan.json
+      - name: Python tests
+        run: python -W ignore -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: JavaScript syntax
+        run: node --check site/app.js

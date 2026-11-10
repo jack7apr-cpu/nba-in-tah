@@ -241,7 +241,7 @@ class Export(unittest.TestCase):
         out = tempfile.mktemp(suffix=".xlsx")
         subprocess.run([sys.executable, "almanac/export_xlsx.py", "--out", out], check=True, capture_output=True)
         wb = openpyxl.load_workbook(out)
-        for name in ("Managers", "Locks", "Players", "Waivers", "Odds", "Trade board", "Lock plan"):
+        for name in ("Managers", "Locks", "Players", "Waivers", "Lock plan"):   # Odds/Trade board only exist when those files are built
             self.assertIn(name, wb.sheetnames)
         for ws in wb:
             for row in ws.iter_rows(values_only=True):

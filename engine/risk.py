@@ -35,6 +35,29 @@ class Params:
 # injury status -> P(plays). Sleeper and ESPN use the same words; when they disagree take the more pessimistic.
 STATUS_PLAY = {"Out": 0.0, "IR": 0.0, "Injured Reserve": 0.0, "Suspension": 0.0, "Doubtful": 0.2,
                "Questionable": 0.6, "Day-To-Day": 0.75, "Probable": 0.93, "GTD": 0.6}
+STATUS_FADE, STATUS_FADE_OUT = 0.7, 0.85   # per day ahead; an "Out" tag lingers longer than a GTD
+
+
+def espn_status(L, live=None):
+    """second injury source: ESPN's league injury report -> {pid: status}. Reads collect.py's live.json if given,
+    else fetches the public endpoint. Name match is exact after accent folding, so a miss means no ESPN status."""
+    import unicodedata, urllib.request
+    fold = lambda s: unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().replace(".", "").strip()
+    rows = []
+    if live and os.path.exists(live):
+        rows = [(r["player"], r["status"]) for r in (N.load(live).get("espn_injuries") or [])]
+    if not rows:
+        try:
+            req = urllib.request.Request("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries",
+                                         headers={"User-Agent": "nba-in-tah/1.0"})
+            j = json.load(urllib.request.urlopen(req, timeout=30))
+            rows = [(i["athlete"]["displayName"], i["status"]) for t in j["injuries"] for i in t["injuries"]]
+        except Exception:
+            return {}
+    by = {}
+    for pid in L.pinfo:
+        by.setdefault(fold(L.pname(pid)), pid)
+    return {by[fold(n)]: st for n, st in rows if fold(n) in by}
 
 
 class Model:
@@ -92,8 +115,10 @@ class Model:
         if b2b:
             q = min(1.0, q + p.bb)
         play = 1 - q
-        if status in STATUS_PLAY:
-            play = min(play, STATUS_PLAY[status])
+        for st in (status if isinstance(status, (list, tuple)) else [status]):
+            if st in STATUS_PLAY:   # today's tag fades for later games (unvalidated prior: no injury history to replay)
+                miss = (1 - STATUS_PLAY[st]) * (STATUS_FADE_OUT if STATUS_PLAY[st] == 0 else STATUS_FADE) ** (D(d) - D(t)).days
+                play = min(play, 1 - miss)
         return play * cond, play, cond, base
 
 

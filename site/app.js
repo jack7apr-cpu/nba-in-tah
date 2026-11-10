@@ -1,10 +1,11 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
+const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["guide","📖","Guide"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL])=>{
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries","guide"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL,GD])=>{
+  D.GD=GD;
   D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; D.FM=FM; D.SAL=SAL; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
@@ -35,7 +36,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup,fun,moves})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup,fun,moves,guide})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -252,3 +253,6 @@ function teamValue(){const S=D.SAL;if(!S||!D.players)return "";const fold=s=>s.n
   const rows=Object.entries(by).sort((a,b)=>b[1].pts/b[1].pay-a[1].pts/a[1].pay),mx=Math.max(...rows.map(r=>r[1].pts/r[1].pay));
   return `<h3 style="margin-top:20px">💰 Team value: fantasy points per real NBA salary</h3><div class="sub">Sum of each roster's per-game averages divided by their combined 2026-27 salary ($M). Higher = more fantasy output per dollar.</div>
   <div class="card">${rows.map(([n,x])=>`<div class="row" style="margin:6px 0"><b style="width:56px">${n}</b><div class="bar sp"><i style="width:${(x.pts/x.pay)/mx*100}%"></i></div><span class="num" style="width:150px;text-align:right">${(x.pts/x.pay).toFixed(2)} pts/$M · $${Math.round(x.pay)}M</span></div>`).join("")}</div>`}
+
+function guide(){const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>");
+  return `<h2>📖 How to use this</h2><div class="sub">Tap a section to open it.</div>${(D.GD||[]).map(s=>`<details class="card" style="margin-top:10px" ${s.o?"open":""}><summary style="cursor:pointer;font-weight:700">${esc(s.t)}</summary>${s.b.map(b=>`<p style="margin:8px 0 0">${md(b)}</p>`).join("")}</details>`).join("")}`}

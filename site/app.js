@@ -1,11 +1,11 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"]];
+const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -28,7 +28,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -122,3 +122,20 @@ function live(){const V=D.V;if(!V)return '<div class="card warn">Live data unava
   ${planCard()}<h2>⚡ Your roster this week</h2><div class="sub">Raw Sleeper per-game projections in your league scoring (the replay-tested model replaces this next), with ESPN injury status.</div>
   <div class="card list">${rows.map(r=>`<div class="it"><div class="sp"><b>${esc(r.p.name)}</b> <span class="sub">${r.p.team||""} · ${(r.p.pos||[]).join("/")}</span><div class="sub">${r.gs.length?r.gs.map((g,i)=>`${g.date.slice(5)} ${esc(g.opp||"")} ${f1(r.pj[i])}`).join(" · "):"no games projected"}</div>${r.i?`<span class="pill ${r.i.status==="Out"?"rd":"or"}">ESPN: ${esc(r.i.status)}</span><span class="sub">${esc(r.i.note||"")}</span>`:""}</div><div style="text-align:right"><span class="num">${r.gs.length}</span><div class="sub">games</div></div></div>`).join("")}</div>
   <h2 style="margin-top:20px">Trending adds (24h)</h2><div class="card list">${V.trending.slice(0,10).map(t=>{const p=V.players[t.player_id]||{};return `<div class="it"><div class="sp"><b>${esc(p.name||t.player_id)}</b> <span class="sub">${p.team||""} · ${(p.pos||[]).join("/")}</span></div><span class="num">${t.count}</span></div>`}).join("")}</div>`}
+
+/* ODDS (Crystal Ball) */
+function odds(){const C=D.C;if(!C)return '<div class="card warn">Odds not built yet.</div>';
+  const t=C.teams,names=Object.keys(t).sort((a,b)=>t[b].title+t[b].playoffs*.001-t[a].title-t[a].playoffs*.001),pc=x=>(x*100).toFixed(x<.1&&x>0?1:0)+"%";
+  setTimeout(()=>document.querySelectorAll("#odds .bar i").forEach(i=>i.style.width=i.dataset.w+"%"),50);
+  after.odds=()=>document.querySelectorAll("[data-o]").forEach(c=>c.onclick=()=>oddsSheet(c.dataset.o));
+  const ji=C.jack_if,opp=C.jack_opp;
+  return `<h2>🔮 Crystal Ball</h2><div class="sub">${C.runs.toLocaleString()} simulated seasons from week ${C.week}. Top ${C.n_playoff} make the playoffs (week ${C.playoff_start}+). Tap a team for its win range.</div>
+  ${ji&&ji.win?`<div class="grid g2" style="margin:12px 0"><div class="card"><div class="lbl">Your week ${C.week} vs ${esc(opp)}</div><div style="margin-top:6px">If you <b class="pos">win</b>: bye <b>${pc(ji.win.bye)}</b> · title <b>${pc(ji.win.title)}</b></div><div>If you <b class="neg">lose</b>: bye <b>${pc(ji.loss.bye)}</b> · title <b>${pc(ji.loss.title)}</b></div><div class="sub" style="margin-top:6px">How much this one result moves your season.</div></div>
+  <div class="card"><div class="lbl">Your title odds</div><div class="big" style="color:var(--or)">${pc(t[ME].title)}</div><div class="sub">expected wins ${t[ME].exp_wins.toFixed(1)}</div></div></div>`:""}
+  <div id="odds" class="card">${names.map(n=>{const x=t[n];return `<div class="it" data-o="${n}" style="display:block;padding:10px 4px"><div class="row"><b>${n}</b><span class="sub">${x.w}–${x.l}</span><span class="sp"></span><span class="num">${pc(x.title)} title</span></div>
+   <div class="sub">make playoffs ${pc(x.playoffs)} · bye ${pc(x.bye)} · #1 seed ${pc(x.seed1)}</div><div class="bar" style="margin-top:4px"><i data-w="${x.playoffs*100}" style="width:0"></i></div></div>`}).join("")}</div>
+  <div class="sub" style="margin-top:10px">${C.assumptions.map(a=>"• "+esc(a)).join("<br>")}</div>`}
+function oddsSheet(n){const x=D.C.teams[n],ks=Object.keys(x.dist).map(Number),mx=Math.max(...Object.values(x.dist));
+  sheet(`<h2>${n}</h2><div class="sub">Now ${x.w}–${x.l}. Scores like ${x.mu} a week. Expected final wins ${x.exp_wins.toFixed(1)}.</div>
+  <h3 style="margin-top:12px">Where the regular season ends (wins)</h3><div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px">${ks.map(k=>`<div title="${k} wins: ${(x.dist[k]*100).toFixed(1)}%" style="flex:1;background:linear-gradient(0deg,var(--or),var(--yl));border-radius:4px 4px 0 0;height:${Math.max(2,x.dist[k]/mx*100)}%"></div>`).join("")}</div><div class="row sub" style="justify-content:space-between"><span>${ks[0]} wins</span><span>${ks[ks.length-1]} wins</span></div>
+  <div class="grid g4" style="margin-top:12px">${[["Playoffs",x.playoffs],["Bye",x.bye],["#1 seed",x.seed1],["Title",x.title]].map(([a,b])=>`<div class="card"><div class="lbl">${a}</div><div class="big" style="font-size:22px">${(b*100).toFixed(1)}%</div></div>`).join("")}</div>`)}

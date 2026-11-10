@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; D.FM=FM; D.SAL=SAL; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -211,7 +211,7 @@ function fun(){const fs=funStats(),T=awardTally(),weeks=Object.keys(D.wk).sort((
   <div class="card"><svg viewBox="0 0 ${W} ${H}" style="width:100%">${grid}${lines}</svg></div>
   <h3 style="margin-top:20px">Head to head</h3>${chips("h1",D.rank,a)}${chips("h2",D.rank,b)}
   <div class="card"><div class="row" style="font-weight:700"><span class="sp mut"></span><span style="width:90px;text-align:right">${a}</span><span style="width:90px;text-align:right">${b}</span></div>${rows.map(([t,f])=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp mut">${t}</span><span class="num" style="width:90px;text-align:right">${f(a)}</span><span class="num" style="width:90px;text-align:right">${f(b)}</span></div>`).join("")}${met?`<div class="sub" style="margin-top:8px">Played each other: ${met}</div>`:'<div class="sub" style="margin-top:8px">Not played yet.</div>'}</div>
-  ${reviewCard()}<h3 style="margin-top:20px">🔒 Lock Leaderboard</h3><div class="sub">The best, worst and costliest counted locks of the season.</div>${lockBoard()}
+  ${reviewCard()}${formatLab()}${teamValue()}<h3 style="margin-top:20px">🔒 Lock Leaderboard</h3><div class="sub">The best, worst and costliest counted locks of the season.</div>${lockBoard()}
   <h3 style="margin-top:20px">🏅 Isaac's awards tally</h3><div class="card tw"><table><tr><th>Manager</th>${AW.map(k=>`<th>${k.replace("Biggest ","").replace("Shit vs Poo","S v P")}</th>`).join("")}</tr>${awRows}</table></div>`}
 
 /* MOVES: matchup stance + free agents */
@@ -240,3 +240,15 @@ function oppCard(m){const t=D.P?.teams?.[m?.opp];if(!t)return "";
   return `<h3 style="margin-top:18px">👀 ${esc(m.opp)}'s lineup</h3><div class="sub">What he can still score this week (expected value of each slot) and where he is in each. Use it to decide how hard to chase or protect.</div>
   <div class="card list">${t.slots.map(s=>{const c=s.chances[0],state=!c?"no games left":c.act==="LOCK"||c.act==="HOLD"?`scored ${c.exp}`:c.act==="FORCED"?"final chance":`next ${c.date.slice(5)}`;return `<div class="it"><span class="pill">${s.slot}</span><div class="sp"><b>${esc(s.player)}</b> <span class="sub">${state}</span></div><span class="num">${s.worth}</span></div>`}).join("")}</div>
   <div class="sub" style="margin:6px 0">He totals about ${t.total} to your ${D.P.teams[ME].total}. He rarely locks early (final-game slots), so his real total tends to land under this.</div>`}
+
+function formatLab(){const FM=D.FM;if(!FM)return "";const W={};
+  for(const [w,ms] of Object.entries(D.F.MU))for(const [a,pa,b,pb] of ms){const A=nm(a),B=nm(b),fa=FM[A+"|"+w],fb=FM[B+"|"+w];if(!fa||!fb)continue;
+    for(const [k,x,y] of [["actual",pa,pb],["perfect",fa.perfect,fb.perfect],["daily",fa.daily,fb.daily]]){(W[A]??={actual:0,perfect:0,daily:0});(W[B]??={actual:0,perfect:0,daily:0});if(x>y)W[A][k]++;else if(y>x)W[B][k]++}}
+  const rows=Object.entries(W).sort((a,b)=>b[1].actual-a[1].actual);
+  return `<h3 style="margin-top:20px">🧪 Format Lab: same scoring, different league</h3><div class="sub">Wins so far if every matchup had been decided by: <b>Lock-In</b> (what happened), <b>Perfect Lock-In</b> (each player's best game, ideally slotted: pure roster quality) or <b>Daily lineups</b> (a normal set-your-lineup-each-day league).</div>
+  <div class="card tw"><table><tr><th>Manager</th><th>Lock-In</th><th>Perfect</th><th>Daily</th></tr>${rows.map(([n,x])=>`<tr><td><b>${n}</b></td><td class="num">${x.actual}</td><td class="num">${x.perfect}</td><td class="num">${x.daily}</td></tr>`).join("")}</table></div>`}
+function teamValue(){const S=D.SAL;if(!S||!D.players)return "";const fold=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[.']/g,"").trim(),by={};
+  for(const p of D.players){const k=S[fold(p.player)];if(!k)continue;const sal=+k[1]/1e6;(by[p.owner]??={pay:0,pts:0,n:0,best:null});by[p.owner].pay+=sal;by[p.owner].pts+=p.avg;by[p.owner].n++;const v=p.avg/sal;if(!by[p.owner].best||v>by[p.owner].best.v)by[p.owner].best={n:p.player,v}}
+  const rows=Object.entries(by).sort((a,b)=>b[1].pts/b[1].pay-a[1].pts/a[1].pay),mx=Math.max(...rows.map(r=>r[1].pts/r[1].pay));
+  return `<h3 style="margin-top:20px">💰 Team value: fantasy points per real NBA salary</h3><div class="sub">Sum of each roster's per-game averages divided by their combined 2026-27 salary ($M). Higher = more fantasy output per dollar.</div>
+  <div class="card">${rows.map(([n,x])=>`<div class="row" style="margin:6px 0"><b style="width:56px">${n}</b><div class="bar sp"><i style="width:${(x.pts/x.pay)/mx*100}%"></i></div><span class="num" style="width:150px;text-align:right">${(x.pts/x.pay).toFixed(2)} pts/$M · $${Math.round(x.pay)}M</span></div>`).join("")}</div>`}

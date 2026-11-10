@@ -1,11 +1,11 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"]];
+const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -28,7 +28,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -139,3 +139,20 @@ function oddsSheet(n){const x=D.C.teams[n],ks=Object.keys(x.dist).map(Number),mx
   sheet(`<h2>${n}</h2><div class="sub">Now ${x.w}–${x.l}. Scores like ${x.mu} a week. Expected final wins ${x.exp_wins.toFixed(1)}.</div>
   <h3 style="margin-top:12px">Where the regular season ends (wins)</h3><div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px">${ks.map(k=>`<div title="${k} wins: ${(x.dist[k]*100).toFixed(1)}%" style="flex:1;background:linear-gradient(0deg,var(--or),var(--yl));border-radius:4px 4px 0 0;height:${Math.max(2,x.dist[k]/mx*100)}%"></div>`).join("")}</div><div class="row sub" style="justify-content:space-between"><span>${ks[0]} wins</span><span>${ks[ks.length-1]} wins</span></div>
   <div class="grid g4" style="margin-top:12px">${[["Playoffs",x.playoffs],["Bye",x.bye],["#1 seed",x.seed1],["Title",x.title]].map(([a,b])=>`<div class="card"><div class="lbl">${a}</div><div class="big" style="font-size:22px">${(b*100).toFixed(1)}%</div></div>`).join("")}</div>`)}
+
+/* TRADE LAB */
+S.tr={own:"All",sort:"ours",give:[],get:[]};
+function trades(){const T=D.T;if(!T)return '<div class="card warn">Trade data not built yet.</div>';
+  after.trades=()=>{bindChips("tro",v=>{S.tr.own=v;route()});bindChips("trs",v=>{S.tr.sort=v;route()});
+    document.querySelectorAll("[data-b]").forEach(e=>e.onclick=()=>{const b=T.board[e.dataset.b],side=b.owner===ME?"give":"get";if(b.owner==="FA")return;const a=S.tr[side],i=a.indexOf(b.name);i<0?a.push(b.name):a.splice(i,1);route()})};
+  const owners=["All",...new Set(T.board.map(b=>b.owner))],B=T.board,by=Object.fromEntries(B.map(b=>[b.name,b]));
+  const sum=(arr,k)=>arr.reduce((t,n)=>t+(by[n]?.[k]||0),0),gO=sum(S.tr.give,"ours"),tO=sum(S.tr.get,"ours"),gM=sum(S.tr.give,"market"),tM=sum(S.tr.get,"market");
+  const rows=B.filter(b=>S.tr.own==="All"||b.owner===S.tr.own).sort((a,b)=>S.tr.sort==="gap"?b.gap-a.gap:S.tr.sort==="market"?b.market-a.market:b.ours-a.ours).slice(0,60);
+  return `<h2>🤝 Trade Lab</h2><div class="sub">${esc(T.note)}</div>
+  <h3 style="margin-top:14px">Win-win ideas for you</h3><div class="sub">Both lineups improve over the remaining weeks (our proxy for "they'd say yes"). Points = change in best-lineup value to season end.</div>
+  <div class="card list">${T.ideas.map(i=>`<div class="it" style="display:block"><div class="row"><b>${esc(i.give.join(" + "))}</b><span class="mut">for</span><b>${esc(i.get.join(" + "))}</b></div><div class="sub">with ${i.with} · you <span class="pos">+${i.me}</span> · them <span class="pos">+${i.them}</span></div></div>`).join("")||'<div class="sub">No mutually good trades right now.</div>'}</div>
+  <h3 style="margin-top:18px">Try your own</h3><div class="sub">Tap your players to give, then theirs to get (tap again to remove). A quick value check, not the full lineup model.</div>
+  <div class="card" style="margin:8px 0"><div>Give: <b>${esc(S.tr.give.join(", ")||"–")}</b> <span class="sub">(${gO} ours · ${gM} market)</span></div><div>Get: <b>${esc(S.tr.get.join(", ")||"–")}</b> <span class="sub">(${tO} ours · ${tM} market)</span></div>
+  ${S.tr.give.length&&S.tr.get.length?`<div class="big" style="font-size:22px;margin-top:6px;color:${tO-gO>=0?"var(--gr)":"var(--rd)"}">${tO-gO>=0?"+":""}${tO-gO} for you</div><div class="sub">${tO-gO<-20?"Fuck no.":tO-gO<0?"You lose value; only if you need the position.":"You win on our numbers; check if they'd accept ("+(tM-gM>0?"market says they lose":"market says it's fair to them")+")."}</div>`:""}</div>
+  ${chips("tro",owners,S.tr.own)}${chips("trs",["ours","market","gap"],S.tr.sort)}
+  <div class="card list">${rows.map((b,i)=>`<div class="it" data-b="${B.indexOf(b)}"><span class="pill ${b.inj&&b.inj!=="Active"?"rd":"bl"}">${(b.pos||[])[0]||"-"}</span><div class="sp"><b>${esc(b.name)}</b> ${S.tr.give.includes(b.name)||S.tr.get.includes(b.name)?'<span class="pill gr">selected</span>':""}<div class="sub">${b.owner} · ${b.team||""}${b.inj?" · "+esc(b.inj):""}</div></div><div style="text-align:right"><span class="num">${b.ours}</span><div class="sub">mkt ${b.market} · <span class="${b.gap>=0?"pos":"neg"}">${b.gap>=0?"+":""}${b.gap}</span></div></div></div>`).join("")}</div>`}

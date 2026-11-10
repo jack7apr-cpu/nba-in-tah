@@ -28,6 +28,7 @@ jobs:
           python engine/fetch_raw.py
           python engine/export_plan.py --out site/data/plan.json
           python engine/export_fa.py --out site/data/fa.json
+          python engine/export_values.py --out site/data/values.json
           python engine/export_trades.py --out site/data/trades.json
           python engine/crystal_nba.py --runs 20000 --out site/data/crystal.json
           python almanac/build_auto.py --live site/data/live.json --facts site/data/factfile.json --out site/data/auto.json

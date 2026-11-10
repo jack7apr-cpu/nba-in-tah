@@ -20,10 +20,11 @@ jobs:
           python engine/collect.py --out site/data/live.json
           python engine/fetch_raw.py
           python engine/export_plan.py --out site/data/plan.json
-      - name: Python tests
-        run: python -W ignore -m unittest discover -s tests -v
+          python engine/export_values.py --out site/data/values.json
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Python tests
+        run: python -W ignore -m unittest discover -s tests -v
       - name: JavaScript syntax
         run: node --check site/app.js

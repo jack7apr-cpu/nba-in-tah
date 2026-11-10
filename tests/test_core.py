@@ -259,6 +259,26 @@ class Frozen(unittest.TestCase):
         self.assertEqual(tot, 794.5)
 
 
+class TradeLab(unittest.TestCase):
+    def test_js_lineup_maths_matches_python(self):
+        import shutil
+        if not shutil.which("node"):
+            self.skipTest("node not installed")
+        out = subprocess.run(["node", "tests/check_trade_js.js"], capture_output=True, text=True, check=True).stdout
+        js = float(out.split()[-1])
+        V = json.load(open("site/data/values.json"))
+        import value as Vl
+        X = Vl.Values(N.League(), V["today"])
+        me = [p for p, o in X.rostered.items() if X.L.name[o] == "Jack"]
+        py = X.lineup(me)
+        self.assertLess(abs(js - py) / py, 0.01)   # weekly values are rounded to 0.1 in the export
+
+    def test_values_cover_every_rostered_player(self):
+        V = json.load(open("site/data/values.json"))
+        self.assertEqual(sorted(V["teams"]), sorted({p["owner"] for p in V["players"]}))
+        self.assertTrue(all(p["weeks"] for p in V["players"] if p["ours"] > 100))
+
+
 class Data(unittest.TestCase):
     def test_live_json_complete(self):
         for k in ("state", "league", "users", "rosters", "matchups", "proj", "players", "espn_injuries", "schedule", "updated"):

@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["moves","🔁","Moves"],["fun","🎉","Fun"],["guide","📖","Guide"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries","guide"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL,GD])=>{
-  D.GD=GD;
+Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official","fa","auto","review","formats","salaries","guide","values"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O,FA,AU,RV,FM,SAL,GD,TV])=>{
+  D.GD=GD; D.TV=TV;
   D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; D.C=C; D.T=T; D.K=K; D.O=O; D.FA=FA; D.AU=AU; D.RV=RV; D.FM=FM; D.SAL=SAL; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
@@ -155,23 +155,51 @@ function oddsSheet(n){const x=D.C.teams[n],ks=Object.keys(x.dist).map(Number),mx
   <h3 style="margin-top:12px">Where the regular season ends (wins)</h3><div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px">${ks.map(k=>`<div title="${k} wins: ${(x.dist[k]*100).toFixed(1)}%" style="flex:1;background:linear-gradient(0deg,var(--or),var(--yl));border-radius:4px 4px 0 0;height:${Math.max(2,x.dist[k]/mx*100)}%"></div>`).join("")}</div><div class="row sub" style="justify-content:space-between"><span>${ks[0]} wins</span><span>${ks[ks.length-1]} wins</span></div>
   <div class="grid g4" style="margin-top:12px">${[["Playoffs",x.playoffs],["Bye",x.bye],["#1 seed",x.seed1],["Title",x.title]].map(([a,b])=>`<div class="card"><div class="lbl">${a}</div><div class="big" style="font-size:22px">${(b*100).toFixed(1)}%</div></div>`).join("")}</div>`)}
 
-/* TRADE LAB */
-S.tr={own:"All",sort:"ours",give:[],get:[]};
-function trades(){const T=D.T;if(!T)return '<div class="card warn">Trade data not built yet.</div>';
-  after.trades=()=>{bindChips("tro",v=>{S.tr.own=v;route()});bindChips("trs",v=>{S.tr.sort=v;route()});
-    document.querySelectorAll("[data-b]").forEach(e=>e.onclick=()=>{const b=T.board[e.dataset.b],side=b.owner===ME?"give":"get";if(b.owner==="FA")return;const a=S.tr[side],i=a.indexOf(b.name);i<0?a.push(b.name):a.splice(i,1);route()})};
-  const owners=["All",...new Set(T.board.map(b=>b.owner))],B=T.board,by=Object.fromEntries(B.map(b=>[b.name,b]));
-  const sum=(arr,k)=>arr.reduce((t,n)=>t+(by[n]?.[k]||0),0),gO=sum(S.tr.give,"ours"),tO=sum(S.tr.get,"ours"),gM=sum(S.tr.give,"market"),tM=sum(S.tr.get,"market");
-  const rows=B.filter(b=>S.tr.own==="All"||b.owner===S.tr.own).sort((a,b)=>S.tr.sort==="gap"?b.gap-a.gap:S.tr.sort==="market"?b.market-a.market:b.ours-a.ours).slice(0,60);
-  return `<h2>🤝 Trade Lab</h2><div class="sub">${esc(T.note)}</div>
-  <h3 style="margin-top:14px">Win-win ideas for you</h3><div class="sub">Both lineups improve over the remaining weeks (our proxy for "they'd say yes"). Points = change in best-lineup value to season end.</div>
-  <div class="card list">${T.ideas.map(i=>`<div class="it" style="display:block"><div class="row"><b>${esc(i.give.join(" + "))}</b><span class="mut">for</span><b>${esc(i.get.join(" + "))}</b></div><div class="sub">with ${i.with} · you <span class="pos">+${i.me}</span> · them <span class="pos">+${i.them}</span></div></div>`).join("")||'<div class="sub">No mutually good trades right now.</div>'}</div>
-  <h3 style="margin-top:18px">Try your own</h3><div class="sub">Tap your players to give, then theirs to get (tap again to remove). A quick value check, not the full lineup model.</div>
-  <div class="card" style="margin:8px 0"><div>Give: <b>${esc(S.tr.give.join(", ")||"–")}</b> <span class="sub">(${gO} ours · ${gM} market)</span></div><div>Get: <b>${esc(S.tr.get.join(", ")||"–")}</b> <span class="sub">(${tO} ours · ${tM} market)</span></div>
-  ${S.tr.give.length&&S.tr.get.length?`<div class="big" style="font-size:22px;margin-top:6px;color:${tO-gO>=0?"var(--gr)":"var(--rd)"}">${tO-gO>=0?"+":""}${tO-gO} for you</div><div class="sub">${tO-gO<-20?"Fuck no.":tO-gO<0?"You lose value; only if you need the position.":"You win on our numbers; check if they'd accept ("+(tM-gM>0?"market says they lose":"market says it's fair to them")+")."}</div>`:""}</div>
-  ${chips("tro",owners,S.tr.own)}${chips("trs",["ours","market","gap"],S.tr.sort)}
-  <div class="card list">${rows.map((b,i)=>`<div class="it" data-b="${B.indexOf(b)}"><span class="pill ${b.inj&&b.inj!=="Active"?"rd":"bl"}">${(b.pos||[])[0]||"-"}</span><div class="sp"><b>${esc(b.name)}</b> ${S.tr.give.includes(b.name)||S.tr.get.includes(b.name)?'<span class="pill gr">selected</span>':""}<div class="sub">${b.owner} · ${b.team||""}${b.inj?" · "+esc(b.inj):""}</div></div><div style="text-align:right"><span class="num">${b.ours}</span><div class="sub">mkt ${b.market} · <span class="${b.gap>=0?"pos":"neg"}">${b.gap>=0?"+":""}${b.gap}</span></div></div></div>`).join("")}</div>`}
-
+/* TRADE LAB: any two teams, live lineup maths */
+S.tr={a:"Jack",b:"David",ga:[],gb:[],sort:"ours",sug:null,own:"All"};
+const TSLOTS=["C","PG","SG","SF","PF","G","F","UTIL","UTIL"],TOK={PG:["PG"],SG:["SG"],G:["PG","SG"],SF:["SF"],PF:["PF"],F:["SF","PF"],C:["C"],UTIL:["PG","SG","SF","PF","C"]};
+function best9(ps,w){const c=ps.map(p=>({p,v:p.weeks[w]||0})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,14);let best=0;
+  const dfs=(k,used,s)=>{if(k===9||!c.length){if(s>best)best=s;return}
+    let rem=0,n=0;for(const x of c){if(!used.has(x)){rem+=x.v;if(++n===9-k)break}}if(s+rem<=best)return;
+    let placed=false;for(const x of c){if(!used.has(x)&&TOK[TSLOTS[k]].some(q=>x.p.pos.includes(q))){placed=true;used.add(x);dfs(k+1,used,s+x.v);used.delete(x)}}
+    if(!placed)dfs(k+1,used,s)};dfs(0,new Set(),0);return best}
+function lineupValue(ps,V){let t=0;const per={};for(let w=V.w0;w<=V.last;w++){const v=best9(ps,String(w))*(w>=V.pstart?V.pw:1);per[w]=v;t+=v}return {t,per}}
+function tradeEval(V,A,B,ga,gb){const pa=V.players.filter(p=>p.owner===A),pb=V.players.filter(p=>p.owner===B),by=Object.fromEntries(V.players.map(p=>[p.name,p]));
+  const gaP=ga.map(n=>by[n]),gbP=gb.map(n=>by[n]);
+  const newA=pa.filter(p=>!ga.includes(p.name)).concat(gbP),newB=pb.filter(p=>!gb.includes(p.name)).concat(gaP);
+  const a0=lineupValue(pa,V),a1=lineupValue(newA,V),b0=lineupValue(pb,V),b1=lineupValue(newB,V);
+  return {da:a1.t-a0.t,db:b1.t-b0.t,a0:a0.t,a1:a1.t,b0:b0.t,b1:b1.t,perA:a1.per,perA0:a0.per,perB:b1.per,perB0:b0.per,mkA:gbP.reduce((t,p)=>t+p.market,0)-gaP.reduce((t,p)=>t+p.market,0),mkB:gaP.reduce((t,p)=>t+p.market,0)-gbP.reduce((t,p)=>t+p.market,0),gaP,gbP,pa,pb,newA,newB}}
+function trades(){const V=D.TV,T=D.T;if(!V)return '<div class="card warn">Trade data not built yet.</div>';
+  const t=S.tr,teams=V.teams;
+  after.trades=()=>{bindChips("tra",v=>{t.a=v;if(t.b===v)t.b=teams.find(x=>x!==v);t.ga=[];t.gb=[];t.sug=null;route()});bindChips("trb",v=>{t.b=v;if(t.a===v)t.a=teams.find(x=>x!==v);t.ga=[];t.gb=[];t.sug=null;route()});
+    document.querySelectorAll("[data-tp]").forEach(e=>e.onclick=()=>{const[side,n]=e.dataset.tp.split("|"),arr=t[side],i=arr.indexOf(n);i<0?arr.push(n):arr.splice(i,1);t.sug=null;route()});
+    const sg=document.getElementById("sug");if(sg)sg.onclick=()=>{sg.textContent="Searching…";setTimeout(()=>{t.sug=suggest(V,t.a,t.b);route()},30)};
+    document.querySelectorAll("[data-sg]").forEach(e=>e.onclick=()=>{const x=t.sug[+e.dataset.sg];t.ga=x.ga;t.gb=x.gb;route()});
+    bindChips("tro",v=>{t.own=v;route()});bindChips("trs",v=>{t.sort=v;route()})};
+  const pa=V.players.filter(p=>p.owner===t.a),pb=V.players.filter(p=>p.owner===t.b),both=t.ga.length&&t.gb.length,E=both?tradeEval(V,t.a,t.b,t.ga,t.gb):null;
+  const col=(side,ps)=>`<div class="card"><div class="lbl">${side==="ga"?t.a:t.b} gives (tap to add)</div>${ps.map(p=>`<div class="row" data-tp="${side}|${esc(p.name)}" style="padding:7px 0;border-top:1px solid var(--line);cursor:pointer;${t[side].includes(p.name)?"background:#ff7a1a22;":""}"><span class="pill ${p.inj&&!["Active","Probable"].includes(p.inj)?"rd":"bl"}">${p.pos[0]||"-"}</span><span class="sp"><b>${esc(p.name)}</b><span class="sub"> ${p.team||""}${p.inj&&p.inj!=="Active"?" · "+esc(p.inj):""}${p.back?" · back ~"+p.back.slice(5):""}</span></span><span class="num">${p.ours}</span></div>`).join("")}</div>`;
+  const fx=(n)=>`<span class="${n>=0?"pos":"neg"} num">${n>=0?"+":""}${Math.round(n)}</span>`;
+  let res="";
+  if(E){const cen=(ps)=>ps.filter(p=>p.pos.includes("C")).length;
+    const verdict=E.da>0&&E.db>0?"Win-win: both lineups improve, so this is the kind of deal that actually gets accepted.":E.da>0&&E.db<=0?`Favours ${t.a}: ${t.b} loses ${Math.round(-E.db)} points, so ${t.b} probably says no unless they want the position or have injury worries.`:E.da<=0&&E.db>0?`Favours ${t.b}: ${t.a} loses ${Math.round(-E.da)} points.`:"Both lineups get worse. Don't.";
+    const inj=[...E.gaP,...E.gbP].filter(p=>p.inj&&!["Active","Probable"].includes(p.inj)).map(p=>`${p.name} (${p.inj}${p.back?", back ~"+p.back:""})`);
+    res=`<div class="card" style="border-color:${E.da>0&&E.db>0?"var(--gr)":"var(--or)"};margin:10px 0"><div class="lbl">Rest-of-season lineup points (playoff weeks count 1.5x)</div>
+    <div class="grid g2" style="margin-top:6px"><div><b>${t.a}</b><div class="big" style="font-size:26px">${fx(E.da)}</div><div class="sub">${Math.round(E.a0)} → ${Math.round(E.a1)} · market ${E.mkA>=0?"+":""}${E.mkA}<br>centres ${cen(E.pa)} → ${cen(E.newA)}</div></div>
+    <div><b>${t.b}</b><div class="big" style="font-size:26px">${fx(E.db)}</div><div class="sub">${Math.round(E.b0)} → ${Math.round(E.b1)} · market ${E.mkB>=0?"+":""}${E.mkB}<br>centres ${cen(E.pb)} → ${cen(E.newB)}</div></div></div>
+    <div style="margin-top:8px"><b>${esc(verdict)}</b></div>${inj.length?`<div class="sub" style="margin-top:6px">Injured in this deal: ${inj.map(esc).join("; ")}. Return dates are estimates.</div>`:""}
+    <div class="sub" style="margin-top:6px">Moving: ${esc(t.ga.join(" + "))} → ${t.b}, ${esc(t.gb.join(" + "))} → ${t.a}. This is the full model (best lineup each week, free rolls, injuries, return dates), not a simple sum.</div></div>`}
+  const sug=t.sug?`<div class="card list" style="margin:8px 0">${t.sug.length?t.sug.map((x,i)=>`<div class="it" data-sg="${i}" style="display:block"><div class="row"><b>${esc(x.ga.join(" + "))}</b><span class="mut">for</span><b>${esc(x.gb.join(" + "))}</b></div><div class="sub">${t.a} <span class="pos">+${Math.round(x.da)}</span> · ${t.b} <span class="pos">+${Math.round(x.db)}</span> · tap to load</div></div>`).join(""):'<div class="sub" style="padding:8px">No deal improves both lineups right now. Try a different pair.</div>'}</div>`:"";
+  const owners=["All",...teams],rows=T?T.board.filter(b=>t.own==="All"||b.owner===t.own).sort((a,b)=>t.sort==="gap"?b.gap-a.gap:t.sort==="market"?b.market-a.market:b.ours-a.ours).slice(0,40):[];
+  return `<h2>🤝 Trade Lab</h2><div class="sub">Pick any two managers, tap players from each side to put them in the deal, and see what it does to both lineups. ${esc(V.note)}</div>
+  <div class="lbl" style="margin-top:12px">Manager A</div>${chips("tra",teams,t.a)}<div class="lbl">Manager B</div>${chips("trb",teams,t.b)}
+  <div class="grid g2">${col("ga",pa)}${col("gb",pb)}</div>${res}
+  <div class="row" style="margin:10px 0"><button id="sug" class="chip on" style="border:0">Find deals that help both</button><span class="sub">tries 1-for-1, 2-for-1 and 1-for-2 between ${t.a} and ${t.b}</span></div>${sug}
+  ${T?`<h3 style="margin-top:20px">Win-win ideas for ${T.team}</h3><div class="card list">${T.ideas.map(i=>`<div class="it" style="display:block"><div class="row"><b>${esc(i.give.join(" + "))}</b><span class="mut">for</span><b>${esc(i.get.join(" + "))}</b></div><div class="sub">with ${i.with} · you <span class="pos">+${i.me}</span> · them <span class="pos">+${i.them}</span></div></div>`).join("")||'<div class="sub">None right now.</div>'}</div>
+  <h3 style="margin-top:18px">Value board</h3><div class="sub">ours = points to season end above a free agent · market = Sleeper draft price on the same scale · gap = ours minus market (positive = underpriced)</div>${chips("tro",owners,t.own)}${chips("trs",["ours","market","gap"],t.sort)}
+  <div class="card list">${rows.map(b=>`<div class="it"><span class="pill ${b.inj&&b.inj!=="Active"?"rd":"bl"}">${(b.pos||[])[0]||"-"}</span><div class="sp"><b>${esc(b.name)}</b><div class="sub">${b.owner} · ${b.team||""}${b.inj?" · "+esc(b.inj):""}</div></div><div style="text-align:right"><span class="num">${b.ours}</span><div class="sub">mkt ${b.market} · <span class="${b.gap>=0?"pos":"neg"}">${b.gap>=0?"+":""}${b.gap}</span></div></div></div>`).join("")}</div>`:""}`}
+function suggest(V,A,B){const top=(o)=>V.players.filter(p=>p.owner===o&&!p.ir).sort((a,b)=>b.ours-a.ours).slice(0,9).map(p=>p.name),ta=top(A),tb=top(B),out=[],pairs=(arr,n)=>n===1?arr.map(x=>[x]):arr.flatMap((x,i)=>arr.slice(i+1).map(y=>[x,y]));
+  for(const [na,nb] of [[1,1],[2,1],[1,2]])for(const ga of pairs(ta,na))for(const gb of pairs(tb,nb)){const e=tradeEval(V,A,B,ga,gb);if(e.da>2&&e.db>2)out.push({ga,gb,da:e.da,db:e.db})}
+  return out.sort((x,y)=>Math.min(y.da,y.db)-Math.min(x.da,x.db)||(y.da+y.db)-(x.da+x.db)).slice(0,8)}
 /* LINEUP: what to start each day, free rolls included */
 const SLOT_ORDER=["PG","SG","G","SF","PF","F","C","UTIL","UTIL"];
 function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">Plan not built yet.</div>';

@@ -15,7 +15,7 @@
 - **Moves:** your win chance this week, a lock stance (protect or chase), David's lineup, and the best free-agent adds.
 - **Fun:** leaders, score lines, head to head, weekly review against the lock engine, Format Lab, Team Value, Lock Leaderboard, awards.
 - **Odds:** the Crystal Ball, 20,000 simulated seasons.
-- **Trades:** a value board, win-win ideas and a quick calculator.
+- **Trades:** pick ANY two managers, tap players from each side to build a deal and see what it does to both lineups to season end (full model: weekly best lineup, injuries, return dates). 'Find deals that help both' searches 1-for-1, 2-for-1 and 1-for-2 swaps. Also a value board and win-win ideas for you.
 
 ## How locking works (Lock-In rules)
 - Only **one game per starter** counts each week. You lock a game after it ends and before that player's next game starts. Locks can't be undone.

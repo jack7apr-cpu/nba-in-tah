@@ -1,7 +1,7 @@
 name: Game-day alerts
 on:
   schedule:
-    - cron: "*/20 16-23,0-4 * * *"   # NBA tip-off window (UTC), every 20 min
+    - cron: "*/20 16-23,0-6 * * *"   # NBA tip-off window (UTC), every 20 min
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -18,6 +18,10 @@ jobs:
           python-version: "3.12"
       - name: Light data pull
         run: python engine/collect.py --light --out /tmp/live.json
+      - name: Fresh lock plan
+        run: |
+          python engine/fetch_raw.py
+          python engine/export_plan.py --out site/data/plan.json
       - name: Send alert only if a starter needs a decision
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
@@ -27,4 +31,4 @@ jobs:
           git config user.name "nba-in-tah bot"
           git config user.email "bot@users.noreply.github.com"
           git add state/notified.json || true
-          git diff --cached --quiet || (git commit -m "alerts: update dedupe state" && git pull --rebase -q && git push -q)
+          git diff --cached --quiet || (git commit -m "alerts: update dedupe state" && git pull --rebase --autostash -q && git push -q)

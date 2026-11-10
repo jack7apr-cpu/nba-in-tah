@@ -11,6 +11,7 @@ game date) is sent at most once. NTFY_TOPIC comes from the environment (GitHub s
 import argparse, datetime as dt, json, os, sys, urllib.request
 
 ME = "jackhill1617"
+ME_NAME = "Jack"
 ALIAS = {"GS": "GSW", "NY": "NYK", "NO": "NOP", "SA": "SAS", "UTAH": "UTA", "WSH": "WAS", "PHO": "PHX", "BKN": "BRK", "CHA": "CHO"}
 HARD, SOFT = {"out", "doubtful", "suspended"}, {"questionable", "day-to-day", "gtd"}
 SHORT = {"out": "OUT", "doubtful": "DOUBT", "suspended": "SUSP", "questionable": "Q", "day-to-day": "DTD", "gtd": "GTD"}
@@ -55,6 +56,19 @@ def decide(live, state, now):
     return alerts
 
 
+def lock_alerts(plan, locked, state):
+    """slots whose finished score beats the rest of the week (plan says LOCK) and that Jack hasn't marked locked"""
+    done = set(locked["players"]) if locked and locked.get("week") == plan["week"] else set()
+    out = []
+    for sl in plan["teams"][ME_NAME]["slots"]:
+        c = sl["chances"][0] if sl["chances"] else None
+        if c and c["act"] == "LOCK" and sl["player"] not in done:
+            key = f"lock|{sl['player']}|{c['exp']}|{plan['week']}"
+            if key not in state:
+                out.append((key, f"LOCK {sl['player']} {c['exp']} (rest of week worth {sl['worth']})"))
+    return out
+
+
 def send(topic, title, lines):
     req = urllib.request.Request(f"https://ntfy.sh/{topic}", data="\n".join(lines).encode(), headers={"Title": title, "Priority": "4"})
     urllib.request.urlopen(req, timeout=20).read()
@@ -64,26 +78,36 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", default="site/data/live.json")
     ap.add_argument("--state", default="state/notified.json")
+    ap.add_argument("--plan", default="site/data/plan.json")
+    ap.add_argument("--locked", default="site/data/locked.json")
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
     live = json.load(open(a.live))
     state = json.load(open(a.state)) if os.path.exists(a.state) else {}
     now = dt.datetime.now(dt.timezone.utc)
-    alerts = decide(live, state, now)
-    if not alerts:
+    batches = [("Final check", decide(live, state, now))]
+    if os.path.exists(a.plan):
+        plan = json.load(open(a.plan))
+        locked = json.load(open(a.locked)) if os.path.exists(a.locked) else None
+        batches.append(("LOCK NOW", lock_alerts(plan, locked, state)))
+    batches = [(t, al) for t, al in batches if al]
+    if not batches:
         print("no alerts")
         return 0
-    lines = [t for _, t in alerts[:3]] + ([f"+{len(alerts) - 3} more"] if len(alerts) > 3 else [])
-    print("\n".join(lines))
+    topic = os.environ.get("NTFY_TOPIC")
+    for title, alerts in batches:
+        lines = [t for _, t in alerts[:3]] + ([f"+{len(alerts) - 3} more"] if len(alerts) > 3 else [])
+        print(title, "|", " / ".join(lines))
+        if a.dry:
+            continue
+        if not topic:
+            print("NTFY_TOPIC not set", file=sys.stderr)
+            return 1
+        send(topic, title, lines)
+        for k, _ in alerts:
+            state[k] = now.isoformat(timespec="minutes")
     if a.dry:
         return 0
-    topic = os.environ.get("NTFY_TOPIC")
-    if not topic:
-        print("NTFY_TOPIC not set", file=sys.stderr)
-        return 1
-    send(topic, "Final check" if any("Q" in t or "DTD" in t or "GTD" in t for t in lines) else "Lineup alert", lines)
-    for k, _ in alerts:
-        state[k] = now.isoformat(timespec="minutes")
     state = {k: v for k, v in state.items() if v >= (now - dt.timedelta(days=3)).isoformat()}
     os.makedirs(os.path.dirname(a.state), exist_ok=True)
     json.dump(state, open(a.state, "w"), indent=1)

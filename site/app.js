@@ -4,8 +4,8 @@ const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Ja
 const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
-Promise.all(["league_data","factfile","live","weeks_auto"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A])=>{
-  D.L=L; D.F=F; D.V=V; D.A=A||{}; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
+Promise.all(["league_data","factfile","live","weeks_auto","plan"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P])=>{
+  D.L=L; D.F=F; D.V=V; D.A=A||{}; D.P=P; prep(); S.wk=Math.max(...Object.keys(L.weeks).map(Number),...Object.keys(D.A).map(Number)); route(); addEventListener("hashchange",route);
 });
 
 function prep(){
@@ -104,6 +104,13 @@ function listP(){const p=S.pl,q=p.q.toLowerCase();const r=D.players.filter(x=>(p
 function waivers(){return `<h2>🔄 Waivers</h2><div class="sub">Every completed add, ranked by gain over the player dropped.</div><div class="card list">${[...D.fa].sort((a,b)=>b.gain-a.gain).map(x=>`<div class="it"><div class="sp"><b>${esc(x.add)}</b> <span class="sub">for ${esc(x.drop)} · ${x.mgr} · wk${x.wk}</span></div><div style="text-align:right"><span class="num ${x.gain>=0?"pos":"neg"}">${x.gain>=0?"+":""}${f1(x.gain)}</span><div class="sub">${x.addavg} vs ${x.dropavg}</div></div></div>`).join("")}</div>`}
 
 /* LIVE */
+function planCard(){const P=D.P;if(!P)return "";const t=P.teams[ME];if(!t)return "";
+  const lock=t.slots.filter(s=>s.chances[0]?.act==="LOCK");
+  const pill=c=>c.act==="LOCK"?'<span class="pill gr">LOCK NOW</span>':c.act==="HOLD"?'<span class="pill">hold</span>':c.act==="FORCED"?'<span class="pill rd">final chance</span>':`<span class="pill or">lock if ≥ ${c.th}</span>`;
+  return `<h2>🔒 Lock plan · week ${P.week}</h2><div class="sub">From the replay-tested model: each slot is a run of chances, and you lock when the score beats what the rest of the week is worth. Built ${P.today}.</div>
+  ${lock.length?`<div class="card" style="border-color:var(--gr);margin:10px 0"><div class="lbl">Do now</div>${lock.map(s=>`<div class="big" style="font-size:22px;color:var(--gr)">Lock ${esc(s.player)}</div><div class="sub">his score beats the rest of the week (worth ${s.worth})</div>`).join("")}</div>`:'<div class="card" style="margin:10px 0">Nothing to lock right now. Hold everyone.</div>'}
+  <div class="card list">${t.slots.map(s=>{const n=s.chances[0];return `<div class="it" data-sl="${esc(s.slot)}"><span class="pill">${s.slot}</span><div class="sp"><b>${esc(s.player)}</b> <span class="sub">worth ${s.worth}</span><div class="sub">${s.chances.map(c=>`${c.date.slice(5)} ${c.free?"🎲 "+esc(c.player):""} ${Math.round(c.plays*100)}% · ${c.exp}`).join(" → ")}</div></div>${n?pill(n):""}</div>`}).join("")}</div>
+  <div class="sub" style="margin:6px 0 18px">Expected lineup total ${t.total}. Bench: ${t.bench.map(b=>esc(b.player)).join(", ")||"–"}.</div>`}
 function live(){const V=D.V;if(!V)return '<div class="card warn">Live data unavailable.</div>';
   const age=(Date.now()-new Date(V.updated))/36e5,errs=Object.keys(V.errors||{}),sc=V.league.scoring_settings;
   const pts=s=>{let t=0;for(const k of ["pts","reb","ast","stl","blk","to","tpm"])t+=(s[k]||0)*(sc[k]||0);t+=(s.dd||0)*(sc.dd||0)+(s.td||0)*(sc.td||0);return t};
@@ -112,6 +119,6 @@ function live(){const V=D.V;if(!V)return '<div class="card warn">Live data unava
   const games={};for(const g of V.proj)if(mine.has(String(g.pid)))(games[g.pid]??=[]).push(g);
   const rows=[...mine].map(pid=>{const p=V.players[pid]||{name:pid},gs=(games[pid]||[]).sort((a,b)=>a.date.localeCompare(b.date)),pj=gs.map(g=>pts(g.stats)),i=inj[(p.name||"").toLowerCase()];return {p,gs,pj,i,best:Math.max(0,...pj)}}).sort((a,b)=>b.best-a.best);
   return `${age>8||errs.length?`<div class="card warn" style="margin-bottom:12px">⚠ Data ${age>8?"is "+Math.round(age)+"h old":"has failed sources: "+errs.join(", ")}</div>`:""}
-  <h2>⚡ Your roster this week</h2><div class="sub">Raw Sleeper per-game projections in your league scoring (the replay-tested model replaces this next), with ESPN injury status.</div>
+  ${planCard()}<h2>⚡ Your roster this week</h2><div class="sub">Raw Sleeper per-game projections in your league scoring (the replay-tested model replaces this next), with ESPN injury status.</div>
   <div class="card list">${rows.map(r=>`<div class="it"><div class="sp"><b>${esc(r.p.name)}</b> <span class="sub">${r.p.team||""} · ${(r.p.pos||[]).join("/")}</span><div class="sub">${r.gs.length?r.gs.map((g,i)=>`${g.date.slice(5)} ${esc(g.opp||"")} ${f1(r.pj[i])}`).join(" · "):"no games projected"}</div>${r.i?`<span class="pill ${r.i.status==="Out"?"rd":"or"}">ESPN: ${esc(r.i.status)}</span><span class="sub">${esc(r.i.note||"")}</span>`:""}</div><div style="text-align:right"><span class="num">${r.gs.length}</span><div class="sub">games</div></div></div>`).join("")}</div>
   <h2 style="margin-top:20px">Trending adds (24h)</h2><div class="card list">${V.trending.slice(0,10).map(t=>{const p=V.players[t.player_id]||{};return `<div class="it"><div class="sp"><b>${esc(p.name||t.player_id)}</b> <span class="sub">${p.team||""} · ${(p.pos||[]).join("/")}</span></div><span class="num">${t.count}</span></div>`}).join("")}</div>`}

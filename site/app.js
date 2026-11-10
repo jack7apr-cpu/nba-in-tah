@@ -156,7 +156,7 @@ function oddsSheet(n){const x=D.C.teams[n],ks=Object.keys(x.dist).map(Number),mx
   <div class="grid g4" style="margin-top:12px">${[["Playoffs",x.playoffs],["Bye",x.bye],["#1 seed",x.seed1],["Title",x.title]].map(([a,b])=>`<div class="card"><div class="lbl">${a}</div><div class="big" style="font-size:22px">${(b*100).toFixed(1)}%</div></div>`).join("")}</div>`)}
 
 /* TRADE LAB: any two teams, live lineup maths */
-S.tr={a:"Jack",b:"David",ga:[],gb:[],sort:"ours",sug:null,own:"All"};
+S.tr={a:"Jack",b:"David",ga:[],gb:[],sort:"ours",sug:null,own:"All",mode:"both",lim:"25"};
 const TSLOTS=["C","PG","SG","SF","PF","G","F","UTIL","UTIL"],TOK={PG:["PG"],SG:["SG"],G:["PG","SG"],SF:["SF"],PF:["PF"],F:["SF","PF"],C:["C"],UTIL:["PG","SG","SF","PF","C"]};
 function best9(ps,w){const c=ps.map(p=>({p,v:p.weeks[w]||0})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,14);let best=0;
   const dfs=(k,used,s)=>{if(k===9||!c.length){if(s>best)best=s;return}
@@ -173,7 +173,7 @@ function trades(){const V=D.TV,T=D.T;if(!V)return '<div class="card warn">Trade 
   const t=S.tr,teams=V.teams;
   after.trades=()=>{bindChips("tra",v=>{t.a=v;if(t.b===v)t.b=teams.find(x=>x!==v);t.ga=[];t.gb=[];t.sug=null;route()});bindChips("trb",v=>{t.b=v;if(t.a===v)t.a=teams.find(x=>x!==v);t.ga=[];t.gb=[];t.sug=null;route()});
     document.querySelectorAll("[data-tp]").forEach(e=>e.onclick=()=>{const[side,n]=e.dataset.tp.split("|"),arr=t[side],i=arr.indexOf(n);i<0?arr.push(n):arr.splice(i,1);t.sug=null;route()});
-    const sg=document.getElementById("sug");if(sg)sg.onclick=()=>{sg.textContent="Searching…";setTimeout(()=>{t.sug=suggest(V,t.a,t.b);route()},30)};
+    const sg=document.getElementById("sug");if(sg)sg.onclick=()=>{sg.textContent="Searching…";setTimeout(()=>{t.sug=suggest(V,t.a,t.b,t.mode,t.lim);route()},30)};bindChips("tmd",v=>{t.mode=v==='Both win'?'both':v===('Best for '+t.a)?'a':'b';t.sug=null;route()});bindChips("tlm",v=>{t.lim=v.replace(/\D/g,'')||'999';t.sug=null;route()});
     document.querySelectorAll("[data-sg]").forEach(e=>e.onclick=()=>{const x=t.sug[+e.dataset.sg];t.ga=x.ga;t.gb=x.gb;route()});
     bindChips("tro",v=>{t.own=v;route()});bindChips("trs",v=>{t.sort=v;route()})};
   const pa=V.players.filter(p=>p.owner===t.a),pb=V.players.filter(p=>p.owner===t.b),both=t.ga.length&&t.gb.length,E=both?tradeEval(V,t.a,t.b,t.ga,t.gb):null;
@@ -188,18 +188,22 @@ function trades(){const V=D.TV,T=D.T;if(!V)return '<div class="card warn">Trade 
     <div><b>${t.b}</b><div class="big" style="font-size:26px">${fx(E.db)}</div><div class="sub">${Math.round(E.b0)} → ${Math.round(E.b1)} · market ${E.mkB>=0?"+":""}${E.mkB}<br>centres ${cen(E.pb)} → ${cen(E.newB)}</div></div></div>
     <div style="margin-top:8px"><b>${esc(verdict)}</b></div>${inj.length?`<div class="sub" style="margin-top:6px">Injured in this deal: ${inj.map(esc).join("; ")}. Return dates are estimates.</div>`:""}
     <div class="sub" style="margin-top:6px">Moving: ${esc(t.ga.join(" + "))} → ${t.b}, ${esc(t.gb.join(" + "))} → ${t.a}. This is the full model (best lineup each week, free rolls, injuries, return dates), not a simple sum.</div></div>`}
-  const sug=t.sug?`<div class="card list" style="margin:8px 0">${t.sug.length?t.sug.map((x,i)=>`<div class="it" data-sg="${i}" style="display:block"><div class="row"><b>${esc(x.ga.join(" + "))}</b><span class="mut">for</span><b>${esc(x.gb.join(" + "))}</b></div><div class="sub">${t.a} <span class="pos">+${Math.round(x.da)}</span> · ${t.b} <span class="pos">+${Math.round(x.db)}</span> · tap to load</div></div>`).join(""):'<div class="sub" style="padding:8px">No deal improves both lineups right now. Try a different pair.</div>'}</div>`:"";
+  const sug=t.sug?`<div class="card list" style="margin:8px 0">${t.sug.length?t.sug.map((x,i)=>`<div class="it" data-sg="${i}" style="display:block"><div class="row"><b>${esc(x.ga.join(" + "))}</b><span class="mut">for</span><b>${esc(x.gb.join(" + "))}</b></div><div class="sub">${t.a} <span class="${x.da>=0?"pos":"neg"}">${x.da>=0?"+":""}${Math.round(x.da)}</span> · ${t.b} <span class="${x.db>=0?"pos":"neg"}">${x.db>=0?"+":""}${Math.round(x.db)}</span> · tap to load${(t.mode==="a"?x.db:x.da)<-50?" · <b class=\"neg\">lopsided: they will almost certainly refuse</b>":""}</div></div>`).join(""):'<div class="sub" style="padding:8px">Nothing matches. Raise how much the other side may lose, or try a different pair.</div>'}</div>`:"";
   const owners=["All",...teams],rows=T?T.board.filter(b=>t.own==="All"||b.owner===t.own).sort((a,b)=>t.sort==="gap"?b.gap-a.gap:t.sort==="market"?b.market-a.market:b.ours-a.ours).slice(0,40):[];
   return `<h2>🤝 Trade Lab</h2><div class="sub">Pick any two managers, tap players from each side to put them in the deal, and see what it does to both lineups. ${esc(V.note)}</div>
   <div class="lbl" style="margin-top:12px">Manager A</div>${chips("tra",teams,t.a)}<div class="lbl">Manager B</div>${chips("trb",teams,t.b)}
   <div class="grid g2">${col("ga",pa)}${col("gb",pb)}</div>${res}
-  <div class="row" style="margin:10px 0"><button id="sug" class="chip on" style="border:0">Find deals that help both</button><span class="sub">tries 1-for-1, 2-for-1 and 1-for-2 between ${t.a} and ${t.b}</span></div>${sug}
+  <h3 style="margin-top:14px">Find a deal</h3>${chips("tmd",["Both win","Best for "+t.a,"Best for "+t.b],t.mode==="both"?"Both win":t.mode==="a"?"Best for "+t.a:"Best for "+t.b)}
+  ${t.mode!=="both"?`<div class="sub">How many lineup points the other side is allowed to lose:</div>${chips("tlm",["0","25","50","100","any"],t.lim==="999"?"any":t.lim)}`:""}
+  <div class="row" style="margin:10px 0"><button id="sug" class="chip on" style="border:0">Find deals</button><span class="sub">tries 1-for-1, 2-for-1 and 1-for-2 between ${t.a} and ${t.b}</span></div>${sug}
   ${T?`<h3 style="margin-top:20px">Win-win ideas for ${T.team}</h3><div class="card list">${T.ideas.map(i=>`<div class="it" style="display:block"><div class="row"><b>${esc(i.give.join(" + "))}</b><span class="mut">for</span><b>${esc(i.get.join(" + "))}</b></div><div class="sub">with ${i.with} · you <span class="pos">+${i.me}</span> · them <span class="pos">+${i.them}</span></div></div>`).join("")||'<div class="sub">None right now.</div>'}</div>
   <h3 style="margin-top:18px">Value board</h3><div class="sub">ours = points to season end above a free agent · market = Sleeper draft price on the same scale · gap = ours minus market (positive = underpriced)</div>${chips("tro",owners,t.own)}${chips("trs",["ours","market","gap"],t.sort)}
   <div class="card list">${rows.map(b=>`<div class="it"><span class="pill ${b.inj&&b.inj!=="Active"?"rd":"bl"}">${(b.pos||[])[0]||"-"}</span><div class="sp"><b>${esc(b.name)}</b><div class="sub">${b.owner} · ${b.team||""}${b.inj?" · "+esc(b.inj):""}</div></div><div style="text-align:right"><span class="num">${b.ours}</span><div class="sub">mkt ${b.market} · <span class="${b.gap>=0?"pos":"neg"}">${b.gap>=0?"+":""}${b.gap}</span></div></div></div>`).join("")}</div>`:""}`}
-function suggest(V,A,B){const top=(o)=>V.players.filter(p=>p.owner===o&&!p.ir).sort((a,b)=>b.ours-a.ours).slice(0,9).map(p=>p.name),ta=top(A),tb=top(B),out=[],pairs=(arr,n)=>n===1?arr.map(x=>[x]):arr.flatMap((x,i)=>arr.slice(i+1).map(y=>[x,y]));
-  for(const [na,nb] of [[1,1],[2,1],[1,2]])for(const ga of pairs(ta,na))for(const gb of pairs(tb,nb)){const e=tradeEval(V,A,B,ga,gb);if(e.da>2&&e.db>2)out.push({ga,gb,da:e.da,db:e.db})}
-  return out.sort((x,y)=>Math.min(y.da,y.db)-Math.min(x.da,x.db)||(y.da+y.db)-(x.da+x.db)).slice(0,8)}
+function suggest(V,A,B,mode,lim){const top=(o)=>V.players.filter(p=>p.owner===o&&!p.ir).sort((a,b)=>b.ours-a.ours).slice(0,9).map(p=>p.name),ta=top(A),tb=top(B),out=[],pairs=(arr,n)=>n===1?arr.map(x=>[x]):arr.flatMap((x,i)=>arr.slice(i+1).map(y=>[x,y])),L=+(lim||25);
+  for(const [na,nb] of [[1,1],[2,1],[1,2]])for(const ga of pairs(ta,na))for(const gb of pairs(tb,nb)){const e=tradeEval(V,A,B,ga,gb);
+    if(mode==="both"?(e.da>2&&e.db>2):mode==="a"?(e.da>5&&e.db>=-L):(e.db>5&&e.da>=-L))out.push({ga,gb,da:e.da,db:e.db})}
+  const key=mode==="both"?(x,y)=>Math.min(y.da,y.db)-Math.min(x.da,x.db)||(y.da+y.db)-(x.da+x.db):mode==="a"?(x,y)=>y.da-x.da:(x,y)=>y.db-x.db;
+  return out.sort(key).slice(0,8)}
 /* LINEUP: what to start each day, free rolls included */
 const SLOT_ORDER=["PG","SG","G","SF","PF","F","C","UTIL","UTIL"];
 function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">Plan not built yet.</div>';

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NBA in tah</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#0b0f1a;color:#e8ecf5;font:16px/1.5 system-ui,sans-serif;padding:24px 16px}
+h1{margin:0 0 4px;font-size:28px}.sub{color:#8a93a8;margin-bottom:24px}
+.card{background:#141a2b;border:1px solid #232c45;border-radius:14px;padding:16px;margin-bottom:12px}
+.warn{border-color:#c2410c;color:#fdba74}
+</style></head><body>
+<h1>NBA in tah</h1><div class="sub" id="sub">Loading…</div>
+<div class="card" id="status"></div>
+<script>
+fetch('data/live.json').then(r=>r.json()).then(d=>{
+  const age=(Date.now()-new Date(d.updated))/36e5;
+  document.getElementById('sub').textContent='Week '+d.state.week+' · updated '+new Date(d.updated).toLocaleString();
+  const s=document.getElementById('status');
+  s.innerHTML='Data pipeline is live. '+d.rosters.length+' teams, '+d.proj.length+' game projections, '+d.espn_injuries.length+' injury entries.';
+  if(age>8||Object.keys(d.errors||{}).length){s.classList.add('warn');s.innerHTML+='<br>⚠ Data may be stale or a source failed.'}
+}).catch(e=>{document.getElementById('sub').textContent='Could not load data.'});
+</script></body></html>

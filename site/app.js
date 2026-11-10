@@ -1,7 +1,7 @@
 "use strict";
 const $=(s,e=document)=>e.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nm=s=>String(s).replace(/ \(GPT\)/,""), f1=x=>Number(x).toFixed(1), ME="Jack";
-const TABS=[["home","🏠","Home"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
+const TABS=[["home","🏠","Home"],["lineup","📋","Lineup"],["weeks","📅","Weeks"],["mgrs","👥","Managers"],["locks","🔒","Lock Lab"],["players","🏀","Players"],["waivers","🔄","Waivers"],["live","⚡","Live"],["odds","🔮","Odds"],["trades","🤝","Trades"]];
 let D={}, S={tab:"home",wk:null,lk:{mgr:"All",wk:"All",sort:"missed"},pl:{q:"",own:"All",pos:"All",sort:"avg"}};
 
 Promise.all(["league_data","factfile","live","weeks_auto","plan","crystal","trades","locked","official"].map(n=>fetch(`data/${n}.json`).then(r=>r.json()).catch(()=>null))).then(([L,F,V,A,P,C,T,K,O])=>{
@@ -22,7 +22,10 @@ function prep(){
 }
 const lockKey=()=>"locked-"+(D.P?.week??"");
 function lockedSet(){const set=new Set(D.K&&D.K.week===D.P?.week?D.K.players:[]);try{for(const n of JSON.parse(localStorage.getItem(lockKey())||"[]"))set.add(n)}catch(e){}return set}
-function toggleLock(n){let a=[];try{a=JSON.parse(localStorage.getItem(lockKey())||"[]")}catch(e){}const i=a.indexOf(n);i<0?a.push(n):a.splice(i,1);try{localStorage.setItem(lockKey(),JSON.stringify(a))}catch(e){}route()}
+function toggleLock(n){let a=[];try{a=JSON.parse(localStorage.getItem(lockKey())||"[]")}catch(e){}const i=a.indexOf(n),on=i<0;on?a.push(n):a.splice(i,1);try{localStorage.setItem(lockKey(),JSON.stringify(a))}catch(e){}syncLock(n,on);route()}
+function syncLock(n,on){let k="";try{k=localStorage.getItem("synckey")||"";if(!k){k=(prompt("Paste your sync key once (lets GitHub and Claude see what you lock). Cancel to keep it on this phone only.")||"").trim();if(k)localStorage.setItem("synckey",k)}}catch(e){}
+  if(!k)return;fetch("https://ntfy.sh/"+encodeURIComponent(k),{method:"POST",body:JSON.stringify({w:D.P?.week,p:n,l:on})}).then(()=>toast(on?"Locked sent":"Undo sent")).catch(()=>toast("Could not sync"))}
+function toast(t){const e=document.createElement("div");e.className="tt";e.style.cssText="left:50%;bottom:90px;transform:translateX(-50%);position:fixed";e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),1800)}
 const verdict=b=>b>=85?"Ghost shit: no wipe needed":b>=70?"Textbook: two wipes":b>=55?"Solid log":b>=40?"Bit of a mess":b>=25?"Dodgy kebab":"Full norovirus";
 const quad=m=>m.shit>=50&&m.poo>=50?"Big and clean":m.shit>=50?"Big log, messy wipe":m.poo>=50?"Small but tidy":"Small and messy";
 
@@ -31,7 +34,7 @@ function route(){
   document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===S.tab));
   const upd=D.V?.updated?new Date(D.V.updated):null;
   $("#sub").textContent=`Week ${D.V?.state?.week??"?"} · live data ${upd?upd.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}):"unavailable"} · almanac through week ${Math.max(...Object.keys(D.L.weeks).map(Number))}`;
-  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
+  $("#app").innerHTML=({home,weeks,mgrs,locks,players,waivers,live,odds,trades,lineup})[S.tab](); (after[S.tab]||(()=>{}))(); scrollTo(0,0);
 }
 const after={};
 function chips(id,opts,cur){return `<div class="chips" id="${id}">${opts.map(o=>`<span class="chip ${String(o)===String(cur)?"on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`}
@@ -166,3 +169,20 @@ function trades(){const T=D.T;if(!T)return '<div class="card warn">Trade data no
   ${S.tr.give.length&&S.tr.get.length?`<div class="big" style="font-size:22px;margin-top:6px;color:${tO-gO>=0?"var(--gr)":"var(--rd)"}">${tO-gO>=0?"+":""}${tO-gO} for you</div><div class="sub">${tO-gO<-20?"Fuck no.":tO-gO<0?"You lose value; only if you need the position.":"You win on our numbers; check if they'd accept ("+(tM-gM>0?"market says they lose":"market says it's fair to them")+")."}</div>`:""}</div>
   ${chips("tro",owners,S.tr.own)}${chips("trs",["ours","market","gap"],S.tr.sort)}
   <div class="card list">${rows.map((b,i)=>`<div class="it" data-b="${B.indexOf(b)}"><span class="pill ${b.inj&&b.inj!=="Active"?"rd":"bl"}">${(b.pos||[])[0]||"-"}</span><div class="sp"><b>${esc(b.name)}</b> ${S.tr.give.includes(b.name)||S.tr.get.includes(b.name)?'<span class="pill gr">selected</span>':""}<div class="sub">${b.owner} · ${b.team||""}${b.inj?" · "+esc(b.inj):""}</div></div><div style="text-align:right"><span class="num">${b.ours}</span><div class="sub">mkt ${b.market} · <span class="${b.gap>=0?"pos":"neg"}">${b.gap>=0?"+":""}${b.gap}</span></div></div></div>`).join("")}</div>`}
+
+/* LINEUP: what to start each day, free rolls included */
+const SLOT_ORDER=["PG","SG","G","SF","PF","F","C","UTIL","UTIL"];
+function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">Plan not built yet.</div>';
+  const days=[...new Set(P.slots.flatMap(s=>s.chances.map(c=>c.date)))].sort();if(!days.length)return '<div class="card">No games left this week.</div>';
+  if(!S.day||!days.includes(S.day))S.day=days.find(d=>d>=D.P.today)||days[0];
+  const LK=lockedSet(),order=[...P.slots].sort((a,b)=>{const ia=SLOT_ORDER.indexOf(a.slot),ib=SLOT_ORDER.indexOf(b.slot);return ia-ib}),dn=d=>new Date(d+"T12:00:00").toLocaleDateString([],{weekday:"short",day:"numeric"});
+  after.lineup=()=>{bindChips("dy",v=>{S.day=days.find(d=>dn(d)===v);route()});document.querySelectorAll("[data-lk]").forEach(e=>e.onclick=()=>toggleLock(e.dataset.lk))};
+  const rows=order.map(s=>{const c=s.chances.find(c=>c.date===S.day),lk=LK.has(s.player);
+    if(lk)return `<div class="it" style="display:block"><div class="row"><span class="pill">${s.slot}</span><b>${esc(s.player)}</b><span class="sp"></span><span class="pill gr">locked ✓ leave him</span></div></div>`;
+    if(!c)return `<div class="it" style="display:block"><div class="row"><span class="pill">${s.slot}</span><span class="mut">${esc(s.player)}: nobody to play today</span></div></div>`;
+    const act=c.act==="LOCK"?'<span class="pill gr">LOCK NOW</span>':c.act==="HOLD"?'<span class="pill">scored, hold</span>':c.act==="FORCED"?'<span class="pill rd">final chance</span>':`<span class="pill or">lock if ≥ ${c.th}</span>`;
+    return `<div class="it" style="display:block"><div class="row"><span class="pill">${s.slot}</span><b>${esc(c.player)}</b>${c.free?'<span class="pill bl">🎲 free roll</span>':""}<span class="sp"></span>${act}</div><div class="sub">${Math.round(c.plays*100)}% to play · expects ${c.exp}${c.free?` · swap in for ${esc(s.player)} before tip`:""}</div><div class="row" style="margin-top:4px"><span class="sub sp">regular: ${esc(s.player)}</span><span class="pill" data-lk="${esc(c.player)}" style="cursor:pointer">I locked</span></div></div>`}).join("");
+  const benchToday=P.bench.map(b=>b.player);
+  return `<h2>📋 Your lineup</h2><div class="sub">The best 9 for each day, free rolls included. Set it in the Sleeper app before the first tip each day. Free roll = a bench player in a slot on a night your regular doesn't play (costs nothing while unlocked).</div>
+  ${chips("dy",days.map(dn),dn(S.day))}<div class="card list">${rows}</div>
+  <div class="sub" style="margin:8px 0">Bench: ${benchToday.map(esc).join(", ")||"–"}. Tap <b>I locked</b> after you lock someone. Sleeper can't tell us.</div>`}

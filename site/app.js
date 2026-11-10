@@ -219,7 +219,7 @@ function moves(){const X=D.FA;if(!X)return '<div class="card warn">Not built yet
   return `<h2>🔁 Moves</h2>${m?`<div class="card"><div class="lbl">Your week ${X.week} vs ${esc(m.opp)}</div><div class="big" style="color:${m.p_win>=.5?"var(--gr)":"var(--rd)"}">${Math.round(m.p_win*100)}% to win</div>
   <div class="sub">Expected locked totals: you ${m.mine} · ${esc(m.opp)} ${m.theirs}</div><div style="margin-top:8px"><b>Lock stance:</b> ${esc(m.stance)}</div>
   <div class="sub" style="margin-top:6px">Sleeper's own box shows a closer game because it uses single-game projections. This number assumes both of you lock sensibly, so ${esc(m.opp)} (who barely uses locks) is probably weaker than shown. A heuristic on top of the model.</div></div>`:""}
-  <h3 style="margin-top:18px">Free agents worth adding</h3><div class="sub">Best add/drop for your lineup. <b>Rest of season</b> and <b>this week</b> are the change in your best-lineup Lock-In points. Streamers show up in "this week".</div>
+  ${oppCard(m)}<h3 style="margin-top:18px">Free agents worth adding</h3><div class="sub">Best add/drop for your lineup. <b>Rest of season</b> and <b>this week</b> are the change in your best-lineup Lock-In points. Streamers show up in "this week".</div>
   <div class="card list">${X.fa.map(f=>`<div class="it" style="display:block"><div class="row"><b>Add ${esc(f.add)}</b><span class="pill">${(f.pos||[]).join("/")}</span><span class="sp"></span><span class="num pos">+${f.ros} ros</span></div><div class="sub">drop ${esc(f.drop)} · this week ${f.week>=0?"+":""}${f.week} · value ${f.value}</div></div>`).join("")||'<div class="sub">No pickup beats your current bench.</div>'}</div>
   <div class="sub" style="margin-top:8px">Waivers are rolling, so claims run in priority order. Check the player isn't hurt or on a back-to-back before claiming.</div>`}
 
@@ -234,3 +234,9 @@ function reviewCard(){const R=D.RV;if(!R)return "";const L=R.league,rows=Object.
   ${L?`<div class="sub" style="margin-top:6px">League: managers ${f1(L.managers)} · engine ${f1(L.engine)} · never lock ${f1(L.never_lock)} · perfect hindsight ${f1(L.hindsight)}</div>`:""}
   <div class="card" style="margin-top:10px"><div class="lbl">Biggest engine-vs-manager differences</div>${R.misses.map(m=>`<div class="row" style="padding:5px 0;border-top:1px solid var(--line)"><span class="sp"><b>${esc(m.player)}</b> <span class="sub">${m.mgr} · wk${m.wk} · games ${m.games.join(", ")}</span></span><span class="num">took ${m.took} · engine ${m.engine}</span></div>`).join("")}</div>
   <div class="sub" style="margin-top:6px">${esc(R.refit||"")}</div>`}
+
+function oppCard(m){const t=D.P?.teams?.[m?.opp];if(!t)return "";
+  const lk=lockedSet();
+  return `<h3 style="margin-top:18px">👀 ${esc(m.opp)}'s lineup</h3><div class="sub">What he can still score this week (expected value of each slot) and where he is in each. Use it to decide how hard to chase or protect.</div>
+  <div class="card list">${t.slots.map(s=>{const c=s.chances[0],state=!c?"no games left":c.act==="LOCK"||c.act==="HOLD"?`scored ${c.exp}`:c.act==="FORCED"?"final chance":`next ${c.date.slice(5)}`;return `<div class="it"><span class="pill">${s.slot}</span><div class="sp"><b>${esc(s.player)}</b> <span class="sub">${state}</span></div><span class="num">${s.worth}</span></div>`}).join("")}</div>
+  <div class="sub" style="margin:6px 0">He totals about ${t.total} to your ${D.P.teams[ME].total}. He rarely locks early (final-game slots), so his real total tends to land under this.</div>`}

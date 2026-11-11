@@ -21,12 +21,12 @@ def log(L, p):
     return [L.actual(p, d) for (pid, d), r in L.act.items() if pid == p and r.get("stats") and r["stats"].get("min", 0) > 0]
 
 
-def table(xs, nmax=5):
-    """expected optimal-stopping value for n = 1..nmax chances"""
-    out, v = [0.0], sum(xs) / len(xs) * (1 - DNP)
+def table(xs, nmax=5, dnp=DNP):
+    """expected optimal-stopping value for n = 1..nmax chances; dnp = chance a game is missed (injury/rest)"""
+    out, v = [0.0], sum(xs) / len(xs) * (1 - dnp)
     out.append(v)
     for _ in range(nmax - 1):
-        v = sum(max(x, v) for x in xs) / len(xs) * (1 - DNP) + DNP * v
+        v = sum(max(x, v) for x in xs) / len(xs) * (1 - dnp) + dnp * v
         out.append(v)
     return out
 
@@ -37,6 +37,7 @@ def main():
     ap.add_argument("--adds", default="Wendell Carter,Kyshawn George,Jalen Smith,Davion Mitchell,Nickeil Alexander,Brandin Podziemski,Day'Ron Sharpe")
     ap.add_argument("--drops", default="Jarrett Allen,Ace Bailey,Josh Giddey,Cedric Coward,P.J. Washington,Dejounte Murray")
     ap.add_argument("--team", default="Jack")
+    ap.add_argument("--dnp", default="", help="per-player miss chance, e.g. \"Jalen Smith=0.08,Jarrett Allen=0.15\" (default 0.04 each)")
     ap.add_argument("--pairs", action="store_true", help="also test two adds + two drops at once")
     a = ap.parse_args()
     L = N.League()
@@ -48,6 +49,7 @@ def main():
     roster = [p for p, o in X.rostered.items() if o == me]
     adds, drops = [find(n) for n in a.adds.split(",")], [find(n) for n in a.drops.split(",")]
     pool = set(roster) | set(adds)
+    miss = {find(k.split('=')[0]): float(k.split('=')[1]) for k in a.dnp.split(',') if '=' in k}
     logs = {p: log(L, p) for p in pool}
     team = {p: (L.pinfo.get(p) or {}).get("team") for p in pool}
     pos = {p: K.positions(L, p) for p in pool}
@@ -66,7 +68,7 @@ def main():
     gains = {k: [] for k in scen if k != "now"}
     wk_gain = {k: [] for k in scen if k != "now"}
     for _ in range(a.reps):
-        tabs = {p: table([rng.choice(logs[p]) for _ in logs[p]] if len(logs[p]) >= 4 else [20.0]) for p in pool}
+        tabs = {p: table([rng.choice(logs[p]) for _ in logs[p]] if len(logs[p]) >= 4 else [20.0], 5, miss.get(p, DNP)) for p in pool}
         tot = {}
         for k, ids in scen.items():
             t = w0 = 0.0

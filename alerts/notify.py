@@ -65,7 +65,9 @@ def lock_alerts(plan, locked, state):
         if c and c["act"] == "LOCK" and sl["player"] not in done:
             key = f"lock|{sl['player']}|{c['exp']}|{plan['week']}"
             if key not in state:
-                out.append((key, f"LOCK {sl['player']} {c['exp']} (rest of week worth {sl['worth']})"))
+                old = c.get("old")
+                tag = "" if old is None else " both agree" if c["exp"] >= old else f" engine only, old rule holds ({old})"
+                out.append((key, f"LOCK {sl['player']} {c['exp']}{tag}"))
     return out
 
 

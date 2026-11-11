@@ -25,8 +25,15 @@ const lockKey=()=>"locked-"+(D.P?.week??"");
 function ls(k){try{return JSON.parse(localStorage.getItem(k+lockKey())||"[]")}catch(e){return []}}
 function lockedSet(){const set=new Set(D.K&&D.K.week===D.P?.week?D.K.players:[]);for(const n of ls("on-"))set.add(n);for(const n of ls("off-"))set.delete(n);return set}
 function toggleLock(n){const on=!lockedSet().has(n);let a=ls("on-"),b=ls("off-");a=a.filter(x=>x!==n);b=b.filter(x=>x!==n);(on?a:b).push(n);try{localStorage.setItem("on-"+lockKey(),JSON.stringify(a));localStorage.setItem("off-"+lockKey(),JSON.stringify(b))}catch(e){}syncLock(n,on);route()}
-function syncLock(n,on){let k="";try{k=localStorage.getItem("synckey")||"";if(!k){k=(prompt("Paste your sync key once (lets GitHub and Claude see what you lock). Cancel to keep it on this phone only.")||"").trim();if(k)localStorage.setItem("synckey",k)}}catch(e){}
-  if(!k)return;fetch("https://ntfy.sh/"+encodeURIComponent(k),{method:"POST",body:JSON.stringify({w:D.P?.week,p:n,l:on})}).then(()=>toast(on?"Locked sent":"Undo sent")).catch(()=>toast("Could not sync"))}
+function keyStores(){return [["localStorage",k=>localStorage.getItem(k),(k,v)=>localStorage.setItem(k,v)],["sessionStorage",k=>sessionStorage.getItem(k),(k,v)=>sessionStorage.setItem(k,v)],["cookie",k=>{const m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)"));return m?decodeURIComponent(m[1]):""},(k,v)=>{document.cookie=k+"="+encodeURIComponent(v)+"; max-age=31536000; path=/; SameSite=Lax"}]]}
+function getKey(){let k="";try{const q=new URLSearchParams(location.search).get("k")||new URLSearchParams(location.hash.split("?")[1]||"").get("k");if(q){setKey(q);return q}}catch(e){}
+  for(const [,g] of keyStores()){try{k=g("synckey");if(k){setKey(k);return k}}catch(e){}}return window.__synckey||""}
+function setKey(k){window.__synckey=k;for(const [,,s] of keyStores()){try{s("synckey",k)}catch(e){}}}
+function syncLock(n,on){const k=getKey();if(!k){toast("No sync key yet: paste it at the bottom of the Lineup tab");return}
+  fetch("https://ntfy.sh/"+encodeURIComponent(k),{method:"POST",body:JSON.stringify({w:D.P?.week,p:n,l:on})}).then(()=>toast(on?"Locked sent":"Undo sent")).catch(()=>toast("Could not sync"))}
+function keyCard(){const k=getKey();return `<div class="card" style="margin-top:12px"><div class="lbl">Sync key</div><div style="margin-top:4px">${k?`<b class="pos">Saved ✓</b> on this device (kept in several places so it survives Safari clean-ups).`:'<b class="neg">Not set</b>: lock taps stay on this phone only.'}</div>
+  <div class="row" style="margin-top:8px"><input id="sk" type="search" placeholder="Paste your sync key" style="flex:1"><button id="skb" class="chip on" style="border:0">Save</button></div>
+  <div class="sub" style="margin-top:6px">Tip: add this once to your Home Screen from a link ending in <code>?k=YOURKEY</code> and it can never be forgotten.</div></div>`}
 function toast(t){const e=document.createElement("div");e.className="tt";e.style.cssText="left:50%;bottom:90px;transform:translateX(-50%);position:fixed";e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),1800)}
 const verdict=b=>b>=85?"Ghost shit: no wipe needed":b>=70?"Textbook: two wipes":b>=55?"Solid log":b>=40?"Bit of a mess":b>=25?"Dodgy kebab":"Full norovirus";
 const quad=m=>m.shit>=50&&m.poo>=50?"Big and clean":m.shit>=50?"Big log, messy wipe":m.poo>=50?"Small but tidy":"Small and messy";
@@ -210,7 +217,7 @@ function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">
   const days=[...new Set(P.slots.flatMap(s=>s.chances.map(c=>c.date)))].sort();if(!days.length)return '<div class="card">No games left this week.</div>';
   if(!S.day||!days.includes(S.day))S.day=days.find(d=>d>=D.P.today)||days[0];
   const LK=lockedSet(),order=[...P.slots].sort((a,b)=>{const ia=SLOT_ORDER.indexOf(a.slot),ib=SLOT_ORDER.indexOf(b.slot);return ia-ib}),dn=d=>new Date(d+"T12:00:00").toLocaleDateString([],{weekday:"short",day:"numeric"});
-  after.lineup=()=>{bindChips("dy",v=>{S.day=days.find(d=>dn(d)===v);route()});document.querySelectorAll("[data-lk]").forEach(e=>e.onclick=()=>toggleLock(e.dataset.lk))};
+  after.lineup=()=>{bindChips("dy",v=>{S.day=days.find(d=>dn(d)===v);route()});document.querySelectorAll("[data-lk]").forEach(e=>e.onclick=()=>toggleLock(e.dataset.lk));const b=document.getElementById("skb");if(b)b.onclick=()=>{const v=document.getElementById("sk").value.trim();if(v){setKey(v);toast("Key saved");route()}}};
   const rows=order.map(s=>{const c=s.chances.find(c=>c.date===S.day),lk=LK.has(s.player);
     if(lk)return `<div class="it" style="display:block"><div class="row"><span class="pill">${s.slot}</span><b>${esc(s.player)}</b><span class="sp"></span><span class="pill gr">locked ✓ leave him</span><span class="pill" data-lk="${esc(s.player)}" style="cursor:pointer">undo</span></div></div>`;
     if(!c)return `<div class="it" style="display:block"><div class="row"><span class="pill">${s.slot}</span><span class="mut">${esc(s.player)}: nobody to play today</span></div></div>`;
@@ -219,7 +226,7 @@ function lineup(){const P=D.P?.teams?.[ME];if(!P)return '<div class="card warn">
   const benchToday=P.bench.map(b=>b.player);
   return `<h2>📋 Your lineup</h2><div class="sub">The best 9 for each day, free rolls included. Set it in the Sleeper app before the first tip each day. Free roll = a bench player in a slot on a night your regular doesn't play (costs nothing while unlocked).</div>
   ${chips("dy",days.map(dn),dn(S.day))}<div class="card list">${rows}</div>
-  <div class="sub" style="margin:8px 0">Bench: ${benchToday.map(esc).join(", ")||"–"}. Tap <b>I locked</b> after you lock someone. Sleeper can't tell us.</div>`}
+  <div class="sub" style="margin:8px 0">Bench: ${benchToday.map(esc).join(", ")||"–"}. Tap <b>I locked</b> after you lock someone. Sleeper can't tell us.</div>${keyCard()}`}
 
 /* FUN: awards tally, fun metrics, weekly score lines, head-to-head */
 S.h2h=["Jack","Isaac"];S.hl=null;

@@ -27,7 +27,7 @@
 
 ## Your phone setup
 - **Site:** open the site in Safari, tap Share, then **Add to Home Screen**. Use that icon from now on.
-- **Sync key:** the first time you tap **I locked** it asks for your sync key. Paste it once (from the Home Screen icon, not Safari).
+- **Sync key:** paste it once into the **Sync key** box at the bottom of the Lineup tab and tap Save (you'll see 'Saved ✓'). It is kept in several places on your phone. For a permanent version, add the site to your Home Screen from a link ending in `?k=YOURKEY`.
 - **Alerts:** install the ntfy app, subscribe to your private topic, leave 'Use another server' off, allow notifications.
 - **Widget:** install Scriptable, paste `widgets/nba-in-tah-widget.js` from the repo, then add a small Scriptable widget on your Home Screen and pick the script. It refreshes when iOS decides, usually 15 to 30 minutes.
 

@@ -37,6 +37,7 @@ def main():
     ap.add_argument("--adds", default="Wendell Carter,Kyshawn George,Jalen Smith,Davion Mitchell,Nickeil Alexander,Brandin Podziemski,Day'Ron Sharpe")
     ap.add_argument("--drops", default="Jarrett Allen,Ace Bailey,Josh Giddey,Cedric Coward,P.J. Washington,Dejounte Murray")
     ap.add_argument("--team", default="Jack")
+    ap.add_argument("--forecast", action="store_true", help="rescale each player's game log so its mean equals the engine's forward forecast (Sleeper projection blended with form)")
     ap.add_argument("--dnp", default="", help="per-player miss chance, e.g. \"Jalen Smith=0.08,Jarrett Allen=0.15\" (default 0.04 each)")
     ap.add_argument("--pairs", action="store_true", help="also test two adds + two drops at once")
     a = ap.parse_args()
@@ -51,6 +52,16 @@ def main():
     pool = set(roster) | set(adds)
     miss = {find(k.split('=')[0]): float(k.split('=')[1]) for k in a.dnp.split(',') if '=' in k}
     logs = {p: log(L, p) for p in pool}
+    if a.forecast:
+        import risk as R
+        Mo = R.Model(L, R.load_params())
+        for p in pool:
+            nxt = [d for d, _ in Mo.games.get(p, ()) if d >= today][:4]
+            fc = [Mo.forecast(p, today, d, (L.pinfo.get(p) or {}).get("team"), (L.pinfo.get(p) or {}).get("injury_status")) for d in nxt]
+            fc = [f[2] for f in fc if f and f[2] > 0]
+            if fc and logs[p] and sum(logs[p]) > 0:
+                k = (sum(fc) / len(fc)) / (sum(logs[p]) / len(logs[p]))
+                logs[p] = [x * k for x in logs[p]]
     team = {p: (L.pinfo.get(p) or {}).get("team") for p in pool}
     pos = {p: K.positions(L, p) for p in pool}
     weeks = list(range(X.w0, X.last + 1))

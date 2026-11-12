@@ -24,9 +24,10 @@ class Params:
     """k: games of own form worth as much as Sleeper's projection; mt: weight on minutes trend; cal: overall calibration;
     a: prior strength (games) on the missed-game rate; streak: P(misses again) after missing his last game;
     bb: extra DNP risk on a back-to-back second leg; bpen: points haircut on a B2B second leg;
-    rest: points uplift with 3+ days off; prior: league miss rate for a player with no history."""
-    def __init__(self, k=6.0, mt=0.5, cal=0.95, a=12.0, streak=0.55, bb=0.03, bpen=0.04, prior=0.04, rest=0.0):
-        self.k, self.mt, self.cal, self.a, self.streak, self.bb, self.bpen, self.prior, self.rest = k, mt, cal, a, streak, bb, bpen, prior, rest
+    rest: points uplift with 3+ days off; prior: league miss rate for a player with no history;
+    star: 0 = old behaviour; 1 = trust a proven star's own form more and fade the calibration discount between 24 and 32 pts."""
+    def __init__(self, k=6.0, mt=0.5, cal=0.95, a=12.0, streak=0.55, bb=0.03, bpen=0.04, prior=0.04, rest=0.0, star=1.0):
+        self.k, self.mt, self.cal, self.a, self.streak, self.bb, self.bpen, self.prior, self.rest, self.star = k, mt, cal, a, streak, bb, bpen, prior, rest, star
 
     def as_dict(self):
         return dict(vars(self))
@@ -101,7 +102,9 @@ class Model:
         pm = proj[-1][6]
         played = [x for x in h if x[4]]
         form = [x[3] for x in played[-10:]]
-        wf = len(form) / (len(form) + p.k) if form else 0.0
+        fm = (sum(form) / len(form)) if form else 0.0
+        k = p.k * (1 - 0.5 * p.star) if fm >= 28 and len(form) >= 6 else p.k      # proven stars: own form counts more
+        wf = len(form) / (len(form) + k) if form else 0.0
         cond = (1 - wf) * base + wf * (sum(form) / len(form) if form else base)
         recent = played[-3:]
         if recent and pm > 0:
@@ -115,7 +118,8 @@ class Model:
             cond *= 1 - p.bpen
         elif prev and (D(d) - D(prev[-1])).days >= 4:            # 3+ full days off
             cond *= 1 + p.rest
-        cond *= p.cal
+        top = min(1.0, max(0.0, (cond - 24) / 8)) * p.star                       # the 9% discount was fitted on mid-range players
+        cond *= p.cal + (1 - p.cal) * top
         # availability: games he has been around for (rows exist), missed = no minutes
         n = len(h)
         miss = sum(1 for x in h if not x[4])

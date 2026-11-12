@@ -64,6 +64,7 @@ def main():
     ap.add_argument("--facts", default="site/data/factfile.json")
     ap.add_argument("--runs", type=int, default=20000)
     ap.add_argument("--out", default="site/data/crystal.json")
+    ap.add_argument("--bump", default="", help="what-if: add points to a team's weekly mean, e.g. Jack=1.5")
     a = ap.parse_args()
     live, facts = json.load(open(a.live)), json.load(open(a.facts))
     rname, played, future, cur, po_start, n_po = build(live, facts)
@@ -96,6 +97,9 @@ def main():
     resid = [v - sum(sc[t]) / len(sc[t]) for t in teams for v in sc[t]]
     sd = max(20.0, math.sqrt(sum(r * r for r in resid) / max(1, len(resid) - len(teams))))
     mu = {t: (sum(sc[t]) + SHRINK * lg_mu) / (len(sc[t]) + SHRINK) for t in teams}
+    for kv in filter(None, a.bump.split(",")):
+        k, v = kv.split("=")
+        mu[k] += float(v)
     rng = random.Random(7)
     res = {t: {"playoffs": 0, "bye": 0, "title": 0, "seed1": 0, "wins": 0, "dist": {}} for t in teams}
     me = "Jack"

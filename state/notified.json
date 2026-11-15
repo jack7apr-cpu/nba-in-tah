@@ -1,8 +1,4 @@
 {
- "lock|Walker Kessler|26.5|4": "2026-11-12T00:25+00:00",
- "lock|Dejounte Murray|8.0|4": "2026-11-12T00:25+00:00",
- "lock|Donovan Clingan|23.0|4": "2026-11-12T00:25+00:00",
- "lock|Ty Jerome|21.0|4": "2026-11-12T00:25+00:00",
  "lock|Walker Kessler|24.0|4": "2026-11-12T03:29+00:00",
  "lock|Michael Porter Jr.|23.0|4": "2026-11-12T03:29+00:00",
  "lock|P.J. Washington|23.5|4": "2026-11-13T00:52+00:00",
@@ -27,5 +23,7 @@
  "Jalen Smith|day-to-day|2026-11-15": "2026-11-14T23:24+00:00",
  "Michael Porter Jr.|day-to-day|2026-11-15": "2026-11-14T23:24+00:00",
  "Giannis Antetokounmpo|day-to-day|2026-11-15": "2026-11-14T23:24+00:00",
- "lock|Giannis Antetokounmpo|28.0|4": "2026-11-15T00:09+00:00"
+ "lock|Giannis Antetokounmpo|28.0|4": "2026-11-15T00:09+00:00",
+ "lock|Josh Giddey|9.0|4": "2026-11-15T01:24+00:00",
+ "lock|Giannis Antetokounmpo|6.5|4": "2026-11-15T01:24+00:00"
 }

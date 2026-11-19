@@ -24,6 +24,8 @@ def build(live, facts):
     po_start, n_po = st.get("playoff_week_start", 22), st.get("playoff_teams", 6)
     mu = {int(w): ms for w, ms in (facts.get("MU") or {}).items()}
     mu = {w: [(a.replace(" (GPT)", ""), pa, b.replace(" (GPT)", ""), pb) for a, pa, b, pb in ms] for w, ms in mu.items()}
+    import os
+    off = json.load(open('site/data/official.json'))['weeks'] if os.path.exists('site/data/official.json') else {}
     played, future = {}, {}
     for w_s, rows in sorted(live["matchups"].items(), key=lambda x: int(x[0])):
         w = int(w_s)
@@ -33,6 +35,8 @@ def build(live, facts):
         ms = [(rname[p[0]["roster_id"]], rname[p[1]["roster_id"]], p[0], p[1]) for p in pairs.values() if len(p) == 2]
         if w in mu:
             played[w] = [(a, pa, b, pb) for a, pa, b, pb in mu[w]]
+        elif str(w) in off and w < cur:   # official totals (season points deltas) beat Sleeper's drifting matchup points
+            played[w] = [(a, off[str(w)].get(a), b, off[str(w)].get(b)) for a, b, x, y in ms]
         elif w < cur:
             played[w] = [(a, round(sum(x["starters_points"] or []), 1), b, round(sum(y["starters_points"] or []), 1)) for a, b, x, y in ms]
         else:
@@ -64,6 +68,8 @@ def main():
     ap.add_argument("--facts", default="site/data/factfile.json")
     ap.add_argument("--runs", type=int, default=20000)
     ap.add_argument("--out", default="site/data/crystal.json")
+    ap.add_argument("--mu-json", default="", help="override team weekly means with a JSON {team: mean}")
+    ap.add_argument("--force", default="", help="what-if: force a result, e.g. 5:Jack:W or 5:Jack:L (the team wins/loses its week-5 game)")
     ap.add_argument("--bump", default="", help="what-if: add points to a team's weekly mean, e.g. Jack=1.5")
     a = ap.parse_args()
     live, facts = json.load(open(a.live)), json.load(open(a.facts))
@@ -97,6 +103,8 @@ def main():
     resid = [v - sum(sc[t]) / len(sc[t]) for t in teams for v in sc[t]]
     sd = max(20.0, math.sqrt(sum(r * r for r in resid) / max(1, len(resid) - len(teams))))
     mu = {t: (sum(sc[t]) + SHRINK * lg_mu) / (len(sc[t]) + SHRINK) for t in teams}
+    if a.mu_json:
+        mu.update(json.load(open(a.mu_json)))
     for kv in filter(None, a.bump.split(",")):
         k, v = kv.split("=")
         mu[k] += float(v)
@@ -112,6 +120,12 @@ def main():
         for w in weeks:
             for x, y in fut[w]:
                 px, py = rng.gauss(mu[x], sd), rng.gauss(mu[y], sd)
+                for fz in filter(None, a.force.split(',')):
+                    fw, ft, fr = fz.split(':')
+                    if int(fw) == w and ft in (x, y):
+                        win_x = (ft == x) == (fr == 'W')
+                        if (px > py) != win_x:
+                            px, py = py, px
                 pf[x] += px; pf[y] += py
                 win = x if px > py else y
                 wins[win] += 1

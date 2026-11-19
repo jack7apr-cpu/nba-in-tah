@@ -100,7 +100,7 @@ class Official(unittest.TestCase):
     def test_seed_matches_screenshots(self):
         out = tempfile.mktemp(suffix=".json")
         w = self.build(0, out)
-        self.assertEqual(sorted(w), ["1", "2", "3"])
+        self.assertTrue({"1", "2", "3"} <= set(w))   # curated seed weeks always present; later weeks are added as they settle
         self.assertEqual(w["3"]["Jack"], 279)
         self.assertEqual(w["3"]["Isaac"], 262.5)
 
@@ -114,9 +114,11 @@ class Official(unittest.TestCase):
 
     def test_new_week_is_difference(self):
         out = tempfile.mktemp(suffix=".json"); json.dump(json.load(open("site/data/official.json")), open(out, "w"))
+        base = len(self.build(0, tempfile.mktemp(suffix=".json")))
         w = self.build(1, out)
-        self.assertEqual(sorted(w), ["1", "2", "3", "4"])
-        self.assertTrue(all(190 < v < 215 for v in w["4"].values()))
+        self.assertEqual(len(w), base + 1)                      # one more settled week => exactly one new official week
+        newest = w[str(max(map(int, w)))]
+        self.assertTrue(all(190 < v < 215 for v in newest.values()))
 
 
 class Engine(unittest.TestCase):
